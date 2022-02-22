@@ -1,5 +1,5 @@
 package ch.epfl.javelo;
-/**@author Vincent Ventura (302810)
+/**@author vince
  **/
 public final class Preconditions {
     /** Private constructor making this

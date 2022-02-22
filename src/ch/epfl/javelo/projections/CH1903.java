@@ -52,7 +52,7 @@ public final class CH1903 {
      * @return double longitude of the coordinate
      */
 
-    double lon (double e, double n){
+    public static double lon (double e, double n){
 
         double x = 10e-6*(e-2600000);
         double y = 10e-6* (n - 1200000);
@@ -69,7 +69,7 @@ public final class CH1903 {
      * @return double latitude of the coordinate
      */
 
-    double lat (double e, double n){
+    public static double lat (double e, double n){
 
         double x = 10e-6*(e-2600000);
         double y = 10e-6* (n - 1200000);
