@@ -3,13 +3,14 @@ package ch.epfl.javelo;
  **/
 public final class Preconditions {
     /** Private constructor making this
-     * method a non-instanciable method.
+     * a non-instanciable class.
      */
     private Preconditions() {}
 
     /**
+     * If the condition is false, the method throws an IllegalArgumentException.
      * @param shouldBeTrue boolean that checks a necessary condition.
-     *  If the condition is false, the method throws an IllegalArgumentException.
+     * @throws IllegalArgumentException if condition is not realised.
      */
     public static void checkArgument(boolean shouldBeTrue) {
         if (!shouldBeTrue) {
