@@ -45,7 +45,7 @@ public class PointCh {
      * @return the longitude of the point in the WGS84 system in radians
      */
     public double lon() {
-        return CH1903.lon(this.e, this.n);
+        return Ch1903.lon(this.e, this.n);
     }
 
     /**
@@ -53,6 +53,6 @@ public class PointCh {
      * @return the latitude of the point in the WGS84 system in radians
      */
     public double lat() {
-        return CH1903.lat(this.e, this.n);
+        return Ch1903.lat(this.e, this.n);
     }
 }

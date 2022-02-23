@@ -8,9 +8,9 @@ import static java.lang.Math.toRadians;
  * @author fuentes
  */
 
-public final class CH1903 {
+public final class Ch1903 {
 
-    private CH1903(){
+    private Ch1903(){
     }
 
     /**
@@ -20,7 +20,7 @@ public final class CH1903 {
      * @return double E coordinate
      */
 
-    double e(double lon, double lat){
+    public static double e(double lon, double lat){
 
         double lambda1 = 10e-4 * (3600*Math.toDegrees(lon) - 26782.5);
         double phi1 = 10e-4 * (3600*Math.toDegrees(lat) - 169028.66);
@@ -36,7 +36,7 @@ public final class CH1903 {
      * @return double N coordinate
      */
 
-    double n(double lon, double lat){
+    public static double n(double lon, double lat){
 
         double lambda1 = 10e-4 * (3600*Math.toDegrees(lon) - 26782.5);
         double phi1 = 10e-4 * (3600*Math.toDegrees(lat) - 169028.66);

@@ -13,12 +13,12 @@ public final class SwissBounds {
 
     }
 
-    final static double MIN_E = 2485000;
-    final static double MAX_E = 2834000;
-    final static double MIN_N = 1075000;
-    final static double MAX_N = 1296000;
-    final static double WIDTH = MAX_E - MIN_E;
-    final static double HEIGHT = MAX_N - MIN_N;
+    final static public double MIN_E = 2485000;
+    final static public double MAX_E = 2834000;
+    final static public double MIN_N = 1075000;
+    final static public double MAX_N = 1296000;
+    final static public double WIDTH = MAX_E - MIN_E;
+    final static public double HEIGHT = MAX_N - MIN_N;
 
 
     /**
