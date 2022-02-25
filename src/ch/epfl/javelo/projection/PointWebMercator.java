@@ -1,4 +1,4 @@
-package ch.epfl.javelo.projections;
+package ch.epfl.javelo.projection;
 
 public class PointWebMercator {
 

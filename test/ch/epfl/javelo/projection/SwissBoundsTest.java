@@ -1,6 +1,5 @@
 package ch.epfl.javelo.projection;
 
-import ch.epfl.javelo.projections.SwissBounds;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

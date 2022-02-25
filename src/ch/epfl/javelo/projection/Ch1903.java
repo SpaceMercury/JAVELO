@@ -1,7 +1,6 @@
-package ch.epfl.javelo.projections;
+package ch.epfl.javelo.projection;
 import java.lang.Math;
 
-import static java.lang.Math.toDegrees;
 import static java.lang.Math.toRadians;
 
 /**
