@@ -40,7 +40,7 @@ public final class WebMercator {
      */
     public static double lon(double x){
 
-        return Math.toRadians((2*Math.PI*x) - Math.PI);
+        return (2*Math.PI*x) - Math.PI;
     }
 
     /**
@@ -50,7 +50,7 @@ public final class WebMercator {
      */
     public static double lat(double y){
 
-        return Math.toRadians( Math.atan(Math.sinh(Math.PI - (2*Math.PI*y))));
+        return Math.atan(Math.sinh(Math.PI - (2*Math.PI*y)));
 
     }
 
