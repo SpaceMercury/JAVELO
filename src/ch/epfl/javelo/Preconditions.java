@@ -3,7 +3,7 @@ package ch.epfl.javelo;
  **/
 public final class Preconditions {
     /** Private constructor making this
-     * a non-instanciable class.
+     * a non-instantiable class.
      */
     private Preconditions() {}
 

@@ -5,14 +5,14 @@ package ch.epfl.javelo;
  */
 public final class Math2 {
     /**
-     * Private constructor making this a non-instanciable class
+     * Private constructor making this a non - instantiable class
      */
     private Math2() {}
 
     /**
      * Uses checkArgument(boolean shouldBeTrue) from Preconditions
      * class in order to make sure x and y are positive integers, and returns
-     * integer (floor) part of dixision of x by y
+     * integer (floor) part of division of x by y
      * @param x positive or null integer
      * @param y positive integer
      * @return integer part of division of x by y
@@ -59,7 +59,6 @@ public final class Math2 {
      * @return the limited value, either v, or min or max if it is smaller or bigger than that value respectively
      */
     public static double clamp(double min, double v, double max) {
-        //TODO: Ask assistant whether or not straight comparison between doubles is accurate enough in this scenario!
         Preconditions.checkArgument(min <= max);
         if(v >= min) {
             return Math.min(v, max);
