@@ -12,12 +12,22 @@ public final class Bits {
     }
 
 
-    int extractSigned(int value, int start, int length){
-        //TODO fill in function
+    static int extractSigned(int value, int start, int length){
+
+        int moveLeft = value << start+length;
+        int moveRight = moveLeft >> 32-length;
+
+        return moveRight;
+
     }
 
-    int exractUnsigned(int value, int start, int length){
-        //TODO fill in function
+    static int extractUnsigned(int value, int start, int length){
+
+        int moveLeft = value << start+length;
+        int moveRight = moveLeft >>> 32-length;
+
+        return moveRight;
+
     }
 
 
