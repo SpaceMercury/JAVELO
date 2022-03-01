@@ -14,7 +14,7 @@ public final class Bits {
 
     static int extractSigned(int value, int start, int length){
 
-        int moveLeft = value << start+length;
+        int moveLeft = value << 32-(start+length);
         int moveRight = moveLeft >> 32-length;
 
         return moveRight;
@@ -23,7 +23,7 @@ public final class Bits {
 
     static int extractUnsigned(int value, int start, int length){
 
-        int moveLeft = value << start+length;
+        int moveLeft = value << 32-(start+length);
         int moveRight = moveLeft >>> 32-length;
 
         return moveRight;
