@@ -20,7 +20,7 @@ public final class WebMercator {
      */
     public static double x(double lon){
 
-        return (0.5*Math.PI) * (Math.toDegrees(lon) + Math.PI);
+        return (0.5 * (1/Math.PI)) * (lon + Math.PI);
     }
 
     /**
@@ -30,7 +30,7 @@ public final class WebMercator {
      */
     public static double y(double lat){
 
-        return (0.5*Math.PI) * (Math.PI - Math2.asinh(Math.tan(Math.toDegrees(lat))));
+        return (0.5* (1/Math.PI)) * (Math.PI - Math2.asinh(Math.tan(lat)));
     }
 
     /**
