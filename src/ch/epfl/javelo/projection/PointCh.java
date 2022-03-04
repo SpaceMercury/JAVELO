@@ -55,4 +55,8 @@ public class PointCh {
     public double lat() {
         return Ch1903.lat(this.e, this.n);
     }
+
+    public double e() {return this.e;}
+
+    public double n() {return this.n;}
 }

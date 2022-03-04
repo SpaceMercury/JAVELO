@@ -17,5 +17,9 @@ public class Q28_4Test {
     }
 
     @Test
-    void DoubleReturnsCorrect() { assertEquals(1., Q28_4.asDouble(25));}
+    void DoubleReturnsCorrect() { assertEquals(1.5625, Q28_4.asDouble(25));}
+
+    @Test
+    void FloatReturnsCorrect() { assertEquals(1.5625, Q28_4.asDouble(25));}
+
 }
