@@ -16,7 +16,7 @@ public final class Functions {
 
 
     public static DoubleUnaryOperator sampled(float[] samples, double xMax){
-
+        Preconditions.checkArgument(! (samples.length < 2 || xMax <= 0));
         return new Sampled(samples, xMax);
     }
 
@@ -25,15 +25,11 @@ public final class Functions {
      * Nested class Constant
      */
 
-    private static final class Constant implements DoubleUnaryOperator{
-
-        public Constant(double y){
-            applyAsDouble(y);
-        }
+    private static final record Constant (double y) implements DoubleUnaryOperator{
 
         @Override
         public double applyAsDouble(double operand) {
-            return operand;
+            return y;
         }
 
     }
@@ -42,16 +38,19 @@ public final class Functions {
      * Nested class Sampled
      */
 
-    private static final class Sampled implements DoubleUnaryOperator{
+    private static final record Sampled (float[] samples, double xMax) implements DoubleUnaryOperator{
 
-
-        public Sampled(float[] samples, double x){
-
-        }
 
         @Override
-        public double applyAsDouble(double operand) {
-            return 0;
+        public double applyAsDouble(double x) {
+
+            double difference = samples.length / xMax ;
+            double position = (x / difference);
+            double xValue = position - (int)position*difference;
+
+            return Math2.interpolate(samples[(int)position] ,samples[(int)position+1] ,xValue);
+
+
         }
     }
 
