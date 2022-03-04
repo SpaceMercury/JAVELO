@@ -40,7 +40,7 @@ public record PointWebMercator(double x, double y) {
      * @param zoomLevel Zoom Level that we want
      * @return Upscaled x coordinate
      */
-    double xAtZoomLevel(int zoomLevel){
+    public double xAtZoomLevel(int zoomLevel){
         return Math.scalb(x, zoomLevel);
     }
 
@@ -49,7 +49,7 @@ public record PointWebMercator(double x, double y) {
      * @param zoomLevel zoom level that we want
      * @return Upscaled y coordinate
      */
-    double yAtZoomLevel(int zoomLevel){
+    public double yAtZoomLevel(int zoomLevel){
         return Math.scalb(y, zoomLevel);
     }
 
@@ -57,7 +57,7 @@ public record PointWebMercator(double x, double y) {
      * Gives longitude of the PointWebMercator
      * @return longitude of PointWebMercator
      */
-    double lon(){
+    public double lon(){
         return 2*Math.PI*x - Math.PI;
     }
 
@@ -65,7 +65,7 @@ public record PointWebMercator(double x, double y) {
      * Gives latitude of the PointWebMercator
      * @return latitude of PointWebMercator
      */
-    double lat(){
+    public double lat(){
         return Math.atan(Math.sinh(Math.PI - 2*Math.PI*y));
     }
 
@@ -73,7 +73,7 @@ public record PointWebMercator(double x, double y) {
      * Converts a PointWebMercator to a PointCh
      * @return Converted PointCh
      */
-    PointCh toPointCh(){
+    public PointCh toPointCh(){
         if(SwissBounds.containsEN(Ch1903.e(WebMercator.lon(x), WebMercator.lat(y)), Ch1903.n(WebMercator.lon(x), WebMercator.lat(y)))) {
             return new PointCh(Ch1903.e(WebMercator.lon(x), WebMercator.lat(y)), Ch1903.n(WebMercator.lon(x), WebMercator.lat(y)));
         }
