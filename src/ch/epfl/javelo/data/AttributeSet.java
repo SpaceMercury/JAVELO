@@ -2,6 +2,8 @@ package ch.epfl.javelo.data;
 
 import ch.epfl.javelo.Preconditions;
 
+import java.util.StringJoiner;
+
 /**
  * @author fuentes
  */
@@ -38,7 +40,13 @@ public record AttributeSet(long bits) {
 
     @Override
     public String toString(){
-
+        StringJoiner joiner = new StringJoiner(",", "{", "}");
+        for(Attribute att : Attribute.ALL) {
+            if(contains(att)) {
+                joiner.add(att.toString());
+            }
+        }
+        return joiner.toString();
     }
 
 

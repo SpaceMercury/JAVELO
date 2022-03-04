@@ -1,23 +1,16 @@
 package ch.epfl.javelo.projection;
 
-public class PointWebMercator {
+import ch.epfl.javelo.Preconditions;
 
-    private double x;
-    private double y;
-
+public record PointWebMercator(double x, double y) {
 
     /**
-     * Default constructor of PointWebMercator which needs to be implemented, as we need to implement
-     * a non default constructor, which overrides default 'default' constructor.
+     * checks that the values are contained within the boundaries 0 and 1
+     * @param x x coordinate
+     * @param y y coordinate
      */
-    public PointWebMercator(){
-        x = 0.0;
-        y = 0.0;
-    }
-
-    public PointWebMercator(double x, double y) {
-        this.x = x;
-        this.y = y;
+    public PointWebMercator {
+        Preconditions.checkArgument((x >= 0 && x <= 1) && (y >= 0 && y <= 1));
     }
 
     /**
@@ -81,8 +74,8 @@ public class PointWebMercator {
      * @return Converted PointCh
      */
     PointCh toPointCh(){
-        if(SwissBounds.containsEN(x, y)) {
-            return new PointCh(x, y);
+        if(SwissBounds.containsEN(Ch1903.e(WebMercator.lon(x), WebMercator.lat(y)), Ch1903.n(WebMercator.lon(x), WebMercator.lat(y)))) {
+            return new PointCh(Ch1903.e(WebMercator.lon(x), WebMercator.lat(y)), Ch1903.n(WebMercator.lon(x), WebMercator.lat(y)));
         }
         return null;
     }
