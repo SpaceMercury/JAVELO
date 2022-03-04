@@ -8,7 +8,6 @@ class WebMercatorTest {
 
     @Test
     public void xWorksOnValues(){
-
     }
 
     @Test
