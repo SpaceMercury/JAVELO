@@ -68,6 +68,11 @@ class GraphNodesTest {
 
     }
 
+    @Test
+    public void checkOutDegrees(){
+
+    }
+
 
 
 }
