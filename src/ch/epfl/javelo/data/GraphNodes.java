@@ -1,6 +1,7 @@
 package ch.epfl.javelo.data;
 
 import ch.epfl.javelo.Bits;
+import ch.epfl.javelo.Q28_4;
 
 import java.nio.IntBuffer;
 
@@ -31,7 +32,7 @@ public record GraphNodes(IntBuffer buffer){
      * @return returns the E coordinate as a double
      */
     public double nodeE(int nodeID) {
-        return buffer.get((nodeID*NODE_INTS)+OFFSET_E);
+        return Q28_4.asDouble(buffer.get((nodeID*NODE_INTS)+OFFSET_E));
     }
 
     /**
@@ -40,29 +41,27 @@ public record GraphNodes(IntBuffer buffer){
      * @return
      */
     public double nodeN(int nodeID) {
-        return buffer.get((nodeID*NODE_INTS)+OFFSET_N);
+        return Q28_4.asDouble(buffer.get((nodeID*NODE_INTS)+OFFSET_N));
     }
 
     /**
      * Function that provides us with the number of edges going out of the desired node
      * @param nodeID used to identify which node will be used, starts at 0
-     * @return
+     * @return the number of edges coming out of a node
      */
     public int outDegree(int nodeID) {
-        return  Bits.extractSigned(buffer.get((nodeID*NODE_INTS)+OFFSET_OUT_EDGES), 28, 4);
+        return  Bits.extractUnsigned(buffer.get((nodeID*NODE_INTS)+OFFSET_OUT_EDGES), 28, 4);
     }
 
     /**
      *
-     * @param nodeID
+     * @param nodeID used to indetify which node will be used, starts at 0
      * @param edgeIndex
-     * @return
+     * @return the identity of the edgeIndex'th edge coming out of a desired node
      */
     public int edgeId(int nodeID, int edgeIndex) {
 
-        //TODO don't exactly know how to grab the other edegeID will ask tmrw
-
-        return Bits.extractUnsigned(outDegree(nodeID),0,28);
+        return Bits.extractUnsigned(buffer.get((nodeID*NODE_INTS)+OFFSET_OUT_EDGES),0,28) + edgeIndex;
 
     }
 
