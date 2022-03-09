@@ -28,7 +28,7 @@ public final class Q28_4 {
      * @return Integer representation of i
      */
     public static int ofInt(int i) {
-        return i >> 4;
+        return i << 4;
     }
 
 

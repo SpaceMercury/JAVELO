@@ -9,6 +9,6 @@ public record GraphSectors(ByteBuffer buffer) {
     record Sector(int startNodeId, int endNodeId) {}
 
     public List<Sector> sectorsInArea(PointCh center, double distance) {
-
+        return null;
     }
 }

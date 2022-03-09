@@ -41,7 +41,7 @@ public record PointWebMercator(double x, double y) {
      * @return Upscaled x coordinate
      */
     public double xAtZoomLevel(int zoomLevel){
-        return Math.scalb(x, zoomLevel);
+        return Math.scalb(x, 8 + zoomLevel);
     }
 
     /**
@@ -50,7 +50,7 @@ public record PointWebMercator(double x, double y) {
      * @return Upscaled y coordinate
      */
     public double yAtZoomLevel(int zoomLevel){
-        return Math.scalb(y, zoomLevel);
+        return Math.scalb(y, 8 + zoomLevel);
     }
 
     /**
