@@ -68,7 +68,13 @@ public final class Functions {
                 double position = (x / difference);
                 double xValue = position - (int) position;
 
-                return Math2.interpolate(samples[(int) position], samples[(int) position + 1], xValue);
+                if((int)position < samples.length -1) {
+                    return Math2.interpolate(samples[(int) position], samples[(int) position + 1], xValue);
+                }
+                else {
+                    return Math2.interpolate(samples[(int) position], samples[(int) position], xValue);
+                }
+
 
 
             }
