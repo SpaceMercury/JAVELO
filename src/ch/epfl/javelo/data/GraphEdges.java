@@ -81,8 +81,6 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
 
 
 
-
-
     /**
      * An edge can have 4 types of different profiles, this
      * @param edgeID the ID of the edge coming out of the node
@@ -102,57 +100,59 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
      */
     public float[] profileSamples(int edgeID) {
 
-
-
-        int profile = Bits.extractUnsigned(profileIds.get(edgeID), 29, 2);
+        int profile = profileIds.get(edgeID) >>> 30;
         int firstIndex = Bits.extractUnsigned(profileIds.get(edgeID), 0, 29);
+        int profiles = 1 + Math2.ceilDiv((Short.toUnsignedInt(edgesBuffer.getShort(edgeID*TOTAl_EDGE + OFFSET_LENGTH))), (Q28_4.ofInt(2)));
 
+        int j = 1;
         elevations.get(firstIndex);
-
-
+        float samples[] = new float[profiles];
+        samples[0] = Q28_4.asFloat(elevations.get(firstIndex));
 
         switch(profile){
-
-
             case 0:
-                return new float[0];
+               return new float[0];
 
             case 1:
+                for (int i = 1; i < profiles; i++) {
+                    samples[i] = Q28_4.asFloat(elevations.get(firstIndex + i));
+                }
                 break;
 
             case 2:
+                for (int i = 1; i < profiles-1  ; ++i) {
+                    samples [i] = Q28_4.asFloat(Bits.extractUnsigned(elevations.get(j), 7,8 ));
+                    samples [i+1] = Q28_4.asFloat(Bits.extractUnsigned(elevations.get(j), 0,8));
+                    ++j;
+                    ++i;
+
+                }
                 break;
 
             case 3:
-                break;
-
-        }
-        if (hasProfile(edgeID)){
-            int profiles = 1 + Math2.ceilDiv(Q28_4.ofInt(edgesBuffer.getShort(edgeID*TOTAl_EDGE + OFFSET_LENGTH)), (Q28_4.ofInt(2)));
-
-            float[] samples = new float[profiles];
-
-            for (int i = 0; i < profiles-1 ; i++) {
-                samples[i] = elevations.get(i);
-            }
-
-
-
-
-            //inverting the array if the edge is inverted
-            if (isInverted(edgeID)) {
-                
-                float[] sampleInverted = new float[profiles];
-                for (int i = 0; i < profiles - 1; i++) {
-                    sampleInverted[i] = samples[profiles - 1 - i];
+                for (int i = 1; i < profiles  ; ++i) {
+                    for (int k = 0; k < profiles; k++) {
+                        samples[i] = Q28_4.asFloat(Bits.extractSigned(Short.toUnsignedInt(elevations.get(j)), 12, 4));
+                        samples[i + 1] = Q28_4.asFloat(Bits.extractSigned(Short.toUnsignedInt(elevations.get(j)), 8, 4));
+                        samples[i + 2] = Q28_4.asFloat(Bits.extractSigned(Short.toUnsignedInt(elevations.get(j)), 4, 4));
+                        samples[i + 3] = Q28_4.asFloat(Bits.extractSigned(Short.toUnsignedInt(elevations.get(j)), 0, 4));
+                    }
                 }
-                return sampleInverted;
-            }
 
-            return samples;
+                break;
+        }
+
+        //inverting the array if the edge is inverted
+
+        if (isInverted(edgeID)) {
+            float[] sampleInverted = new float[profiles];
+            for (int i = 0; i < profiles - 1; i++) {
+                sampleInverted[i] = samples[profiles - 1 - i];
+            }
+            return sampleInverted;
         }
         else{
-            return new float[0];
+            return samples;
         }
     }
 
