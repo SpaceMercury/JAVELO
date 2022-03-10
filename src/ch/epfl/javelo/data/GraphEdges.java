@@ -1,6 +1,7 @@
 package ch.epfl.javelo.data;
 
 import ch.epfl.javelo.Bits;
+import ch.epfl.javelo.Math2;
 import ch.epfl.javelo.Q28_4;
 
 import java.nio.ByteBuffer;
@@ -17,10 +18,10 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
     //Constants used in the classes
 
     private static final int OFFSET_1 = 0;
-    private static final int OFFSET_LENGTH = OFFSET_1 + 1;
-    private static final int OFFSET_GRADIENT = OFFSET_LENGTH + 1;
-    private static final int OFFSET_IDENTITY = OFFSET_GRADIENT+1;
-    private static final int TOTAl_EDGE = OFFSET_IDENTITY+1;
+    private static final int OFFSET_LENGTH = OFFSET_1 + 4;
+    private static final int OFFSET_GRADIENT = OFFSET_LENGTH + 2;
+    private static final int OFFSET_IDENTITY = OFFSET_GRADIENT+2;
+    private static final int TOTAl_EDGE = OFFSET_IDENTITY+2;
 
 
 
@@ -33,8 +34,8 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
      */
     public boolean isInverted(int edgeID) {
 
-        int firstValue = edgesBuffer.get(edgeID*TOTAl_EDGE + OFFSET_1);
-        int firstBit = Bits.extractUnsigned(firstValue, 31,1);
+        int firstValue = edgesBuffer.getShort(edgeID*TOTAl_EDGE + OFFSET_1);
+        int firstBit = Bits.extractUnsigned(firstValue, 30,1);
 
         return firstBit !=0;
 
@@ -47,7 +48,15 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
      */
     public int targetNodeId(int edgeID) {
 
-         return Bits.extractUnsigned(edgesBuffer.get(edgeID*TOTAl_EDGE + OFFSET_1), 0, 31);
+        int targetNode = edgesBuffer.getInt((edgeID*TOTAl_EDGE) + OFFSET_1);
+
+        if (isInverted(edgeID)) {
+            return ~targetNode;
+        }
+        else{
+            return targetNode;
+        }
+
     }
 
     /**
@@ -57,7 +66,7 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
      */
     public double length(int edgeID) {
         // Note the use of Short.toUnsignedInt to convert the short to an int for the use of asDouble
-        return Q28_4.asDouble(Short.toUnsignedInt(edgesBuffer.get(edgeID*TOTAl_EDGE + OFFSET_LENGTH)));
+        return Q28_4.asDouble(Short.toUnsignedInt(edgesBuffer.getShort(edgeID*TOTAl_EDGE + OFFSET_LENGTH)));
     }
 
 
@@ -67,16 +76,22 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
      * @return
      */
     public double elevationGain(int edgeID) {
+        return Q28_4.asDouble(Short.toUnsignedInt(edgesBuffer.getShort(edgeID*TOTAl_EDGE + OFFSET_GRADIENT)));
     }
 
 
-//
+
+
+
     /**
-     *
-     * @param edgeID
-     * @return
+     * An edge can have 4 types of different profiles, this
+     * @param edgeID the ID of the edge coming out of the node
+     * @return true if the edge has a profile
      */
     public boolean hasProfile(int edgeID) {
+
+        int profileValue = Bits.extractUnsigned(profileIds.get(edgeID), 29, 2);
+        return profileValue != 0;
     }
 
 
@@ -86,6 +101,59 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
      * @return
      */
     public float[] profileSamples(int edgeID) {
+
+
+
+        int profile = Bits.extractUnsigned(profileIds.get(edgeID), 29, 2);
+        int firstIndex = Bits.extractUnsigned(profileIds.get(edgeID), 0, 29);
+
+        elevations.get(firstIndex);
+
+
+
+        switch(profile){
+
+
+            case 0:
+                return new float[0];
+
+            case 1:
+                break;
+
+            case 2:
+                break;
+
+            case 3:
+                break;
+
+        }
+        if (hasProfile(edgeID)){
+            int profiles = 1 + Math2.ceilDiv(Q28_4.ofInt(edgesBuffer.getShort(edgeID*TOTAl_EDGE + OFFSET_LENGTH)), (Q28_4.ofInt(2)));
+
+            float[] samples = new float[profiles];
+
+            for (int i = 0; i < profiles-1 ; i++) {
+                samples[i] = elevations.get(i);
+            }
+
+
+
+
+            //inverting the array if the edge is inverted
+            if (isInverted(edgeID)) {
+                
+                float[] sampleInverted = new float[profiles];
+                for (int i = 0; i < profiles - 1; i++) {
+                    sampleInverted[i] = samples[profiles - 1 - i];
+                }
+                return sampleInverted;
+            }
+
+            return samples;
+        }
+        else{
+            return new float[0];
+        }
     }
 
 
@@ -95,8 +163,7 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
      * @return
      */
     public int attributesIndex(int edgeID) {
+        return Short.toUnsignedInt(edgesBuffer.getShort(edgeID*TOTAl_EDGE + OFFSET_IDENTITY));
     }
-
-
 
 }
