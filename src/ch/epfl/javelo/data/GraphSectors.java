@@ -19,6 +19,12 @@ public record GraphSectors(ByteBuffer buffer) {
 
     public record Sector(int startNodeId, int endNodeId) {}
 
+    /**
+     * Method returns all sectors that are within the square of length 2*distance of the Point that is chosen
+     * @param center The point in respect to which we look at the map
+     * @param distance Half of the length of the square, or max linear distance between point and sector
+     * @return A list of sectors that are contained within the square
+     */
     public List<Sector> sectorsInArea(PointCh center, double distance) {
 
         double negativeE = center.e() - distance - MIN_E;
@@ -27,11 +33,10 @@ public record GraphSectors(ByteBuffer buffer) {
         double positiveN = center.n() + distance - MIN_N;
         double sectorWidth = WIDTH / SECTOR_NUMBER;
         double sectorHeight = HEIGHT / SECTOR_NUMBER;
-
-        double xNeg = Math.floor(Math2.clamp(0, (negativeE / sectorWidth),127));
-        double xPos = Math.floor(Math2.clamp(0, (positiveE / sectorWidth), 127));
-        double yNeg = Math.floor(Math2.clamp(0, (negativeN / sectorHeight), 127));
-        double yPos = Math.floor(Math2.clamp(0, (positiveN / sectorHeight), 127));
+        double xNeg = Math.floor(Math2.clamp(0.0, (negativeE / sectorWidth),127.0));
+        double xPos = Math.floor(Math2.clamp(0.0, (positiveE / sectorWidth), 127.0));
+        double yNeg = Math.floor(Math2.clamp(0.0, (negativeN / sectorHeight), 127.0));
+        double yPos = Math.floor(Math2.clamp(0.0, (positiveN / sectorHeight), 127.0));
         ArrayList<Sector> containedList = new ArrayList<>();
 
         /**
@@ -39,7 +44,6 @@ public record GraphSectors(ByteBuffer buffer) {
          * should it be necessary
          */
         int sectorNumber = 128;
-
 
 
         for(int i = (int) xNeg; i <= (int) xPos; i++){
