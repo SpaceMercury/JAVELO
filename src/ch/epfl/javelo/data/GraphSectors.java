@@ -28,10 +28,10 @@ public record GraphSectors(ByteBuffer buffer) {
         double sectorWidth = WIDTH / SECTOR_NUMBER;
         double sectorHeight = HEIGHT / SECTOR_NUMBER;
 
-        double xNeg = Math.floor(Math2.clamp(MIN_E, (negativeE / sectorWidth),MAX_E));
-        double xPos = Math.floor(Math2.clamp(MIN_E, (positiveE / sectorWidth), MAX_E));
-        double yNeg = Math.floor(Math2.clamp(MIN_N, (negativeN / sectorHeight), MAX_N));
-        double yPos = Math.floor(Math2.clamp(MIN_N, (positiveN / sectorHeight), MAX_N));
+        double xNeg = Math.floor(Math2.clamp(0, (negativeE / sectorWidth),127));
+        double xPos = Math.floor(Math2.clamp(0, (positiveE / sectorWidth), 127));
+        double yNeg = Math.floor(Math2.clamp(0, (negativeN / sectorHeight), 127));
+        double yPos = Math.floor(Math2.clamp(0, (positiveN / sectorHeight), 127));
         ArrayList<Sector> containedList = new ArrayList<>();
 
         /**
@@ -48,7 +48,6 @@ public record GraphSectors(ByteBuffer buffer) {
                 int indexSector = j * sectorNumber + i;
                 Sector s = new Sector(buffer.getInt(indexSector * OFFSET_ID), buffer.getInt(indexSector * OFFSET_ID) + toUnsignedInt(buffer.getShort( OFFSET_NUMBER + OFFSET_ID * indexSector)));
                 containedList.add(s);
-
             }
         }
         return containedList;
