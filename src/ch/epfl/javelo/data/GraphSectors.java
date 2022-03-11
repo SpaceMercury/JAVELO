@@ -1,6 +1,8 @@
 package ch.epfl.javelo.data;
 
+import ch.epfl.javelo.Math2;
 import ch.epfl.javelo.projection.PointCh;
+import ch.epfl.javelo.projection.SwissBounds;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -26,11 +28,11 @@ public record GraphSectors(ByteBuffer buffer) {
         double sectorWidth = WIDTH / SECTOR_NUMBER;
         double sectorHeight = HEIGHT / SECTOR_NUMBER;
 
-        int xNeg = (int) (negativeE / sectorWidth);
-        int xPos = (int) (positiveE / sectorWidth);
-        int yNeg = (int) (negativeN / sectorHeight);
-        int yPos = (int) (positiveN / sectorHeight);
-        ArrayList<Sector> retour = null; /** Pas sur de ca*/
+        double xNeg = Math.floor(Math2.clamp(MIN_E, (negativeE / sectorWidth),MAX_E));
+        double xPos = Math.floor(Math2.clamp(MIN_E, (positiveE / sectorWidth), MAX_E));
+        double yNeg = Math.floor(Math2.clamp(MIN_N, (negativeN / sectorHeight), MAX_N));
+        double yPos = Math.floor(Math2.clamp(MIN_N, (positiveN / sectorHeight), MAX_N));
+        ArrayList<Sector> containedList = new ArrayList<>();
 
         /**
          * Defining this as a constant allows us to easier change the number of sectors we use
@@ -39,17 +41,16 @@ public record GraphSectors(ByteBuffer buffer) {
         int sectorNumber = 128;
 
 
-        for(int i = xNeg; i <= xPos; i++){
-            for(int u = yNeg; u <= yPos; u++){
 
-                int indexSector = u * sectorNumber + i;
-                int startNodeId = buffer.getInt(indexSector * OFFSET_ID);
-                int endNodeId = startNodeId + toUnsignedInt(buffer.getShort( OFFSET_NUMBER + OFFSET_ID * indexSector));
-                Sector s = new Sector(startNodeId, endNodeId);
-                retour.add(s);
+        for(int i = (int) xNeg; i <= (int) xPos; i++){
+            for(int j = (int) yNeg; j <= (int) yPos; j++){
+
+                int indexSector = j * sectorNumber + i;
+                Sector s = new Sector(buffer.getInt(indexSector * OFFSET_ID), buffer.getInt(indexSector * OFFSET_ID) + toUnsignedInt(buffer.getShort( OFFSET_NUMBER + OFFSET_ID * indexSector)));
+                containedList.add(s);
 
             }
         }
-        return retour;
+        return containedList;
     }
 }
