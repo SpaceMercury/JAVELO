@@ -104,10 +104,9 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
         int firstIndex = Bits.extractUnsigned(profileIds.get(edgeID), 0, 29);
         int profiles = 1 + Math2.ceilDiv((Short.toUnsignedInt(edgesBuffer.getShort(edgeID*TOTAl_EDGE + OFFSET_LENGTH))), (Q28_4.ofInt(2)));
 
-        int j = 1;
-        elevations.get(firstIndex);
         float samples[] = new float[profiles];
         samples[0] = Q28_4.asFloat(elevations.get(firstIndex));
+
 
         switch(profile){
             case 0:
@@ -115,19 +114,19 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
 
             case 1:
                 for (int i = 1; i < profiles; i++) {
-                    samples[i] = Q28_4.asFloat(elevations.get(firstIndex + i));
+                    samples[i] = samples[i-1] + (elevations.get(firstIndex + i));
                 }
                 break;
 
             case 2:
                 for (int i = 1; i < profiles ; ++i) {
-                    samples[i] = samples[i-1] + Q28_4.asFloat(Bits.extractSigned(elevations.get(firstIndex+(i/2)+1), i*8 ,8 ));
+                    samples[i] = samples[i-1] + Q28_4.asFloat(Bits.extractSigned(elevations.get(firstIndex+((i-1)/2)+1), (i%2) * 8,8 ));
                 }
                 break;
 
             case 3:
                 for (int i = 1; i < profiles  ; ++i) {
-                    samples[i] = samples[i-1] + Q28_4.asFloat(Bits.extractSigned(Short.toUnsignedInt(elevations.get(firstIndex+(i/4)+1)), 12 % i , 4));
+                    samples[i] = samples[i-1] + Q28_4.asFloat(Bits.extractSigned(Short.toUnsignedInt(elevations.get(firstIndex+((i-1)/4)+1)), 12 - ((i - 1) %4) * 4 , 4));
                 }
                 break;
         }
@@ -136,7 +135,7 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
 
         if (isInverted(edgeID)) {
             float[] sampleInverted = new float[profiles];
-            for (int i = 0; i < profiles - 1; i++) {
+            for (int i = 0; i < profiles; i++) {
                 sampleInverted[i] = samples[profiles - 1 - i];
             }
             return sampleInverted;

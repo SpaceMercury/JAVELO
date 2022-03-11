@@ -80,12 +80,43 @@ class GraphEdgesTest {
     }
 
     @Test
-    public void testForCase1(){
+    public void testForCase2(){
+
+        ByteBuffer edgesBuffer = ByteBuffer.allocate(10);
+        edgesBuffer.putInt(0, ~12);
+        edgesBuffer.putShort(4, (short) 0x10_b);
+        edgesBuffer.putShort(6, (short) 0x10_0);
+        edgesBuffer.putShort(8, (short) 2022);
+
+        IntBuffer profileIds = IntBuffer.wrap(new int[]{
+                // Type : 2. Index du premier échantillon : 1.
+                (2 << 30) | 1
+        });
+
+        ShortBuffer elevations = ShortBuffer.wrap(new short[]{
+                (short) 0,
+                (short) 0x180C, (short) 0xFEFF,
+                (short) 0xFFFE, (short) 0xF000,
+                (short) 0xF000, (short) 0xABC7,
+                (short) 0x984F, (short) 0xFABC,
+        });
+
+        GraphEdges edges =
+                new GraphEdges(edgesBuffer, profileIds, elevations);
+
+        float[] expectedSamples = new float[]{
+                377.0625f, 382.375f, 382.375f, 383.375f, 383.375f,
+                384.375f, 384.5f, 384.5625f, 384.625f, 384.75f
+        };
+        // [377.0625, 382.375, 382.375, 383.375, 383.375, 384.375, 384.5, 384.5625, 384.625, 384.75]
+
+        assertArrayEquals(expectedSamples, edges.profileSamples(0));
+
 
     }
 
     @Test
-    public void testForCase2(){
+    public void testForCase1(){
 
     }
 
