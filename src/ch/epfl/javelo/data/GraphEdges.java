@@ -120,25 +120,15 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
                 break;
 
             case 2:
-                for (int i = 1; i < profiles-1  ; ++i) {
-                    samples [i] = Q28_4.asFloat(Bits.extractUnsigned(elevations.get(j), 7,8 ));
-                    samples [i+1] = Q28_4.asFloat(Bits.extractUnsigned(elevations.get(j), 0,8));
-                    ++j;
-                    ++i;
-
+                for (int i = 1; i < profiles ; ++i) {
+                    samples[i] = samples[i-1] + Q28_4.asFloat(Bits.extractSigned(elevations.get(firstIndex+(i/2)+1), i*8 ,8 ));
                 }
                 break;
 
             case 3:
                 for (int i = 1; i < profiles  ; ++i) {
-                    for (int k = 0; k < profiles; k++) {
-                        samples[i] = Q28_4.asFloat(Bits.extractSigned(Short.toUnsignedInt(elevations.get(j)), 12, 4));
-                        samples[i + 1] = Q28_4.asFloat(Bits.extractSigned(Short.toUnsignedInt(elevations.get(j)), 8, 4));
-                        samples[i + 2] = Q28_4.asFloat(Bits.extractSigned(Short.toUnsignedInt(elevations.get(j)), 4, 4));
-                        samples[i + 3] = Q28_4.asFloat(Bits.extractSigned(Short.toUnsignedInt(elevations.get(j)), 0, 4));
-                    }
+                    samples[i] = samples[i-1] + Q28_4.asFloat(Bits.extractSigned(Short.toUnsignedInt(elevations.get(firstIndex+(i/4)+1)), 12 % i , 4));
                 }
-
                 break;
         }
 
