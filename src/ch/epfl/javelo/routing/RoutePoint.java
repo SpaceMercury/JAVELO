@@ -42,12 +42,13 @@ public record RoutePoint(PointCh point, double position, double distanceToRefere
     }
 
 
-    //do not understand
+
     /**
-     *
-      * @param positionDifference
-     * @return
+     * Function that creates a new point but shifted by a certain position
+     * @param positionDifference the shift in position of the point
+     * @return a point with the same parameters as this but adding the position difference
      */
     public RoutePoint withPositionShiftedBy(double positionDifference) {
+        return new RoutePoint(point, position + positionDifference, distanceToReference);
     }
 }
