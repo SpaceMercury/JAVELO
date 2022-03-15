@@ -7,15 +7,58 @@ import java.util.List;
 public interface Route {
 
 
+    /**
+     *
+     * @param position
+     * @return
+     */
+    abstract int indexOfSegmentAt(double position);
 
-    int indexIfsegmentAt(double position);
-    double length();
-    List<Edge> edges();
-    List<PointCh> points();
-    PointCh pointAt(double position);
-    double elevationAt(double position);
-    int nodeClosestTo(double position);
-    RoutePoint pointCLosestTo(PointCh point);
+    /**
+     *
+     * @return
+     */
+    abstract double length();
+
+    /**
+     *
+     * @return
+     */
+    abstract List<Edge> edges();
+
+    /**
+     *
+     * @return
+     */
+    abstract List<PointCh> points();
+
+    /**
+     *
+     * @param position
+     * @return
+     */
+    abstract PointCh pointAt(double position);
+
+    /**
+     *
+     * @param position
+     * @return
+     */
+    abstract double elevationAt(double position);
+
+    /**
+     *
+     * @param position
+     * @return
+     */
+    abstract int nodeClosestTo(double position);
+
+    /**
+     *
+     * @param point
+     * @return
+     */
+    abstract RoutePoint pointClosestTo(PointCh point);
 
 
 }

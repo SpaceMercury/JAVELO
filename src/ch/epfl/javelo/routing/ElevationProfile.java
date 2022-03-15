@@ -39,7 +39,7 @@ public final class ElevationProfile {
      *
      * @return the length of the profile in meters
      */
-    double length(){
+    public double length(){
         return length;
     }
 
@@ -47,7 +47,7 @@ public final class ElevationProfile {
      *
      * @return minimum altitude of the profile in meters
      */
-    double minElevation() {
+    public double minElevation() {
         return stats.getMin();
     }
 
@@ -55,7 +55,7 @@ public final class ElevationProfile {
      *
      * @return maximum altitude of the profile in meters
      */
-    double maxElevation(){
+    public double maxElevation(){
         return stats.getMax();
     }
 
@@ -63,7 +63,7 @@ public final class ElevationProfile {
      *
      * @return positive incline of the profile in meters
      */
-    double totalAscent(){
+    public double totalAscent(){
         double tempAscent = 0;
         for (int i = 0; i < elevationSamples.length; i++) {
 
@@ -78,7 +78,7 @@ public final class ElevationProfile {
      *
      * @return negative incline of the profile in meters
      */
-    double totalDescent(){
+    public double totalDescent(){
 
         double tempDescent = 0;
         for (int i = 0; i < elevationSamples.length; i++) {
@@ -96,7 +96,7 @@ public final class ElevationProfile {
      * @param position the desired position as a double
      * @return The elevation at the given position
      */
-    double elevationAt(double position){
+    public double elevationAt(double position){
 
         if (position < 0) {
             return elevationSamples[0];
