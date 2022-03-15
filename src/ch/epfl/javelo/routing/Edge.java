@@ -5,11 +5,13 @@ import ch.epfl.javelo.projection.PointCh;
 
 import java.util.function.DoubleUnaryOperator;
 
-public record Edge(int fromNodeID, int toNodeID, PointCh fromPoint, PointCh toPoin, double length, DoubleUnaryOperator profile) {
+public record Edge(int fromNodeID, int toNodeID, PointCh fromPoint, PointCh toPoint, double length, DoubleUnaryOperator profile) {
 
 /*
     public static Edge of(Graph graph, int edgeId, int fromNodeId, int toNodeId){
 
+
+        return new Edge(fromNodeId, toNodeId, , , graph.edgeLength(edgeId), graph.edgeProfile(edgeId))
     }
 
     public double positionClosestTo(PointCh point){
