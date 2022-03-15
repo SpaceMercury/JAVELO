@@ -4,8 +4,11 @@ import ch.epfl.javelo.Functions;
 import ch.epfl.javelo.projection.PointCh;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.DoubleUnaryOperator;
 
@@ -29,7 +32,7 @@ public final class Graph {
      * @param edges
      * @param attributeSets
      */
-    public Graph (GraphNodes nodes, GraphSectors sectors, GraphEdges edges, List<AttributeSet> attributeSets){
+    public Graph(GraphNodes nodes, GraphSectors sectors, GraphEdges edges, List<AttributeSet> attributeSets){
 
         this.nodes = nodes;
         this.sectors = sectors;
@@ -45,17 +48,13 @@ public final class Graph {
      * @throws IOException
      */
     Graph loadFrom(Path basePath) throws IOException {
-
-        //TODO vince do this with fileInputStreams and those things
-        //The objective of this part is to do a try catch for every attribute of the Graph Constructor
-        //So: nodes, sectors, edges, and attribute set and load them from the respective bin files
-        //and so finally return a new graph with those new parameters
-
         // Nodes
         try(FileChannel channel = FileChannel.open(basePath)){
 
             basePath.resolve("lausanne/nodes.bin");
-            this.nodes =
+            ByteBuffer nodeBuffer = new int[];
+            channel.read(nodeBuffer, 0);
+            //GraphNodes readNodes = new GraphNodes(nodeBuffer);
         }
         catch(IOException){
 
@@ -118,13 +117,18 @@ public final class Graph {
     }
 
     /**
-     *
+     * Method that finds the closest Node to a point by comparing the square of the distances.
      * @param point
      * @param searchDistance
      * @return
      */
     int nodeClosestTo(PointCh point, double searchDistance){
-
+        ArrayList<GraphSectors.Sector> inArea = sectors.sectorsInArea(point, searchDistance);
+        PointCh nodePoint = new PointCh(inArea.get(0).)
+        double minDistance = searchDistance;
+        for(GraphSectors.Sector sect : inArea){
+            Point
+        }
     }
 
     /**
