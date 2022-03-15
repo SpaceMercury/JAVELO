@@ -11,6 +11,11 @@ import java.util.List;
 import static ch.epfl.javelo.projection.SwissBounds.*;
 import static java.lang.Short.toUnsignedInt;
 
+/**
+ * @author ventura
+ * @author fuentes
+ */
+
 public record GraphSectors(ByteBuffer buffer) {
     private static final int OFFSET_ID = Integer.BYTES;
     private static final int OFFSET_NUMBER = Integer.BYTES + Short.BYTES;
@@ -25,19 +30,19 @@ public record GraphSectors(ByteBuffer buffer) {
      * @param distance Half of the length of the square, or max linear distance between point and sector
      * @return A list of sectors that are contained within the square
      */
-    public List<Sector> sectorsInArea(PointCh center, double distance) {
+    public ArrayList<Sector> sectorsInArea(PointCh center, double distance) {
 
+        ArrayList<Sector> containedList = new ArrayList<>();
         double negativeE = center.e() - distance - MIN_E;
         double positiveE = center.e() + distance - MIN_E;
         double negativeN = center.n() - distance - MIN_N;
         double positiveN = center.n() + distance - MIN_N;
         double sectorWidth = WIDTH / SECTOR_NUMBER;
         double sectorHeight = HEIGHT / SECTOR_NUMBER;
-        double xNeg = Math.floor(Math2.clamp(0.0, (negativeE / sectorWidth),127.0));
-        double xPos = Math.floor(Math2.clamp(0.0, (positiveE / sectorWidth), 127.0));
-        double yNeg = Math.floor(Math2.clamp(0.0, (negativeN / sectorHeight), 127.0));
-        double yPos = Math.floor(Math2.clamp(0.0, (positiveN / sectorHeight), 127.0));
-        ArrayList<Sector> containedList = new ArrayList<>();
+        double xNeg = Math.floor(Math2.clamp(0, (negativeE / sectorWidth),127));
+        double xPos = Math.floor(Math2.clamp(0, (positiveE / sectorWidth), 127));
+        double yNeg = Math.floor(Math2.clamp(0, (negativeN / sectorHeight), 127));
+        double yPos = Math.floor(Math2.clamp(0, (positiveN / sectorHeight), 127));
 
         /**
          * Defining this as a constant allows us to easier change the number of sectors we use
@@ -50,7 +55,7 @@ public record GraphSectors(ByteBuffer buffer) {
             for(int j = (int) yNeg; j <= (int) yPos; j++){
 
                 int indexSector = j * sectorNumber + i;
-                Sector s = new Sector(buffer.getInt(indexSector * OFFSET_ID), buffer.getInt(indexSector * OFFSET_ID) + toUnsignedInt(buffer.getShort( OFFSET_NUMBER + OFFSET_ID * indexSector)));
+                Sector s = new Sector(buffer.getInt(indexSector * OFFSET_NUMBER), buffer.getInt(indexSector * OFFSET_NUMBER) + toUnsignedInt(buffer.getShort( OFFSET_ID + OFFSET_NUMBER * indexSector)));
                 containedList.add(s);
             }
         }
