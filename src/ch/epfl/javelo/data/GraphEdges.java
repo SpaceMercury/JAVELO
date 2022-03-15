@@ -115,7 +115,7 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
 
             case 1:
                 for (int i = 1; i < profiles; i++) {
-                    samples[i] =  Q28_4.asFloat(Short.toUnsignedInt(elevations.get(firstIndex + i)));
+                    samples[i] =  Q28_4.asFloat((elevations.get(firstIndex + i)));
                 }
                 break;
 

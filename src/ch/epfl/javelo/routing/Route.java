@@ -13,6 +13,7 @@ public interface Route {
     List<Edge> edges();
     List<PointCh> points();
     PointCh pointAt(double position);
+    double elevationAt(double position);
     int nodeClosestTo(double position);
     RoutePoint pointCLosestTo(PointCh point);
 
