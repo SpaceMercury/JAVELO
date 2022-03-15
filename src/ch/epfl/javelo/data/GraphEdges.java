@@ -88,7 +88,8 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
      */
     public boolean hasProfile(int edgeID) {
 
-        int profileValue = Bits.extractUnsigned(profileIds.get(edgeID), 29, 2);
+        int profileValue = profileIds.get(edgeID) >> 30;
+//        int profileValue = Bits.extractSigned(profileIds.get(edgeID), 30, 2);
         return profileValue != 0;
     }
 

@@ -7,7 +7,7 @@ import java.util.function.DoubleUnaryOperator;
 
 public record Edge(int fromNodeID, int toNodeID, PointCh fromPoint, PointCh toPoin, double length, DoubleUnaryOperator profile) {
 
-
+/*
     public static Edge of(Graph graph, int edgeId, int fromNodeId, int toNodeId){
 
     }
@@ -25,6 +25,6 @@ public record Edge(int fromNodeID, int toNodeID, PointCh fromPoint, PointCh toPo
     public double elevationAt(double position){
 
     }
-
+*/
 
 }
