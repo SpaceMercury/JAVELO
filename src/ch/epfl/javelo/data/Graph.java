@@ -162,7 +162,7 @@ public final class Graph {
      * @return
      */
     AttributeSet edgeAttributes(int edgeId){
-        attributeSets.is
+        return AttributeSet.of()
     }
 
     /**
