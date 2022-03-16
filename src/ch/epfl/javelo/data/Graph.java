@@ -162,7 +162,7 @@ public final class Graph {
      * @return
      */
     AttributeSet edgeAttributes(int edgeId){
-        attributeSets.
+        attributeSets.is
     }
 
     /**
@@ -171,7 +171,7 @@ public final class Graph {
      * @return
      */
     double edgeLength(int edgeId){
-
+        edges.length(edgeId);
     }
 
     /**
