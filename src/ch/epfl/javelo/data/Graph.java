@@ -124,11 +124,18 @@ public final class Graph {
      */
     int nodeClosestTo(PointCh point, double searchDistance){
         ArrayList<GraphSectors.Sector> inArea = sectors.sectorsInArea(point, searchDistance);
-        PointCh nodePoint = new PointCh(inArea.get(0).)
-        double minDistance = searchDistance;
+        int closestNodeId = -1;
+        double minDistance = Math.pow(searchDistance,2);
         for(GraphSectors.Sector sect : inArea){
-            Point
+            for(int i = sect.startNodeId(); i < sect.endNodeId(); i++){
+                PointCh contender = new PointCh(nodes.nodeE(i), nodes.nodeN(i));
+                if(point.squaredDistanceTo(contender) < minDistance){
+                    closestNodeId = i;
+                    minDistance = point.squaredDistanceTo(contender);
+                }
+            }
         }
+        return closestNodeId;
     }
 
     /**
@@ -155,7 +162,7 @@ public final class Graph {
      * @return
      */
     AttributeSet edgeAttributes(int edgeId){
-        attributeSets.
+        return AttributeSet.of()
     }
 
     /**
@@ -164,7 +171,7 @@ public final class Graph {
      * @return
      */
     double edgeLength(int edgeId){
-
+        edges.length(edgeId);
     }
 
     /**

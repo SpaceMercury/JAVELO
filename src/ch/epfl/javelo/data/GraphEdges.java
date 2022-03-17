@@ -16,7 +16,7 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
 
 
     //Constants used in the classes
-
+    //TODO: make this into an enum, I read somewhere that using enums is better than constants.
     private static final int OFFSET_1 = 0;
     private static final int OFFSET_LENGTH = OFFSET_1 + 4;
     private static final int OFFSET_GRADIENT = OFFSET_LENGTH + 2;
