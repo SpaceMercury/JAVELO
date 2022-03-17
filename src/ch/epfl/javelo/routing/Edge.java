@@ -23,17 +23,17 @@ public record Edge(int fromNodeID, int toNodeID, PointCh fromPoint, PointCh toPo
     }
 
     public double positionClosestTo(PointCh point){
-        Math2.projectionLength();
+//        Math2.projectionLength();
     }
 
 
     public PointCh pointAt(double position){
-        return Math2.interpolate(0,0,position);
+//        return Math2.interpolate(0,0,position);
     }
 
 
     public double elevationAt(double position){
-        ElevationProfile.elevationAt(position);
+//        ElevationProfile.elevationAt(position);
     }
 
 
