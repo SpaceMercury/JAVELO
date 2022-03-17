@@ -22,9 +22,9 @@ public record Edge(int fromNodeID, int toNodeID, PointCh fromPoint, PointCh toPo
         return new Edge(fromNodeId, toNodeId, graph.nodePoint(fromNodeId) ,graph.nodePoint(toNodeId) , graph.edgeLength(edgeId), graph.edgeProfile(edgeId))
     }
 
-    public double positionClosestTo(PointCh point){
+//    public double positionClosestTo(PointCh point){
 //        Math2.projectionLength();
-    }
+//    }
 
 
     public PointCh pointAt(double position){
