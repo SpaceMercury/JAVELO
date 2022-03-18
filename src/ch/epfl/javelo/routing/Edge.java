@@ -18,16 +18,16 @@ public record Edge(int fromNodeID, int toNodeID, PointCh fromPoint, PointCh toPo
      * @return
      */
     public static Edge of(Graph graph, int edgeId, int fromNodeId, int toNodeId){
-
-        return new Edge(fromNodeId, toNodeId, graph.nodePoint(fromNodeId) ,graph.nodePoint(toNodeId) , graph.edgeLength(edgeId), graph.edgeProfile(edgeId));
+        return new Edge(fromNodeId, toNodeId, graph.nodePoint(fromNodeId), graph.nodePoint(toNodeId), graph.edgeLength(edgeId), graph.edgeProfile(edgeId));
     }
+
     public double positionClosestTo(PointCh point){
         return Math2.projectionLength(fromPoint.e(), fromPoint.n(), toPoint.e(), toPoint.n(), point.e(), point.n());
     }
 
 
     public PointCh pointAt(double position){
-//        return Math2.interpolate(0,0,position);
+        return new PointCh(Math2.interpolate(fromPoint.n(),toPoint.n(),position), toPoint.n());
     }
 
 
