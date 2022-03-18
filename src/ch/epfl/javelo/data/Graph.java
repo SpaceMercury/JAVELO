@@ -163,7 +163,7 @@ public final class Graph {
     /**
      *
      * @param edgeId Index of the edge
-     * @return
+     * @return boolean if the edge is inverted
      */
     public boolean edgeIsInverted(int edgeId){
         return edges.isInverted(edgeId);

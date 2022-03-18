@@ -15,7 +15,7 @@ public record Edge(int fromNodeID, int toNodeID, PointCh fromPoint, PointCh toPo
      * @param edgeId
      * @param fromNodeId
      * @param toNodeId
-     * @return
+     * @return a new Edge
      */
     public static Edge of(Graph graph, int edgeId, int fromNodeId, int toNodeId){
         return new Edge(fromNodeId, toNodeId, graph.nodePoint(fromNodeId), graph.nodePoint(toNodeId), graph.edgeLength(edgeId), graph.edgeProfile(edgeId));
