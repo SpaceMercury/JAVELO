@@ -23,8 +23,6 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
     private static final int OFFSET_IDENTITY = OFFSET_GRADIENT+2;
     private static final int TOTAl_EDGE = OFFSET_IDENTITY+2;
 
-
-
     // THE FOLLOWING 4 functions will use the edgesBuffer input
 
     /**

@@ -19,12 +19,11 @@ public record Edge(int fromNodeID, int toNodeID, PointCh fromPoint, PointCh toPo
      */
     public static Edge of(Graph graph, int edgeId, int fromNodeId, int toNodeId){
 
-        return new Edge(fromNodeId, toNodeId, graph.nodePoint(fromNodeId) ,graph.nodePoint(toNodeId) , graph.edgeLength(edgeId), graph.edgeProfile(edgeId))
+        return new Edge(fromNodeId, toNodeId, graph.nodePoint(fromNodeId) ,graph.nodePoint(toNodeId) , graph.edgeLength(edgeId), graph.edgeProfile(edgeId));
     }
-
-//    public double positionClosestTo(PointCh point){
-//        Math2.projectionLength();
-//    }
+    public double positionClosestTo(PointCh point){
+        Math2.projectionLength();
+    }
 
 
     public PointCh pointAt(double position){

@@ -47,30 +47,29 @@ public final class Graph {
      * @return a new Graph with the attributes which have been loaded from the bin files
      * @throws IOException
      */
-    Graph loadFrom(Path basePath) throws IOException {
+    static Graph loadFrom(Path basePath) throws IOException {
         // Nodes
-        try(FileChannel channel = FileChannel.open(basePath)){
-
-            basePath.resolve("lausanne/nodes.bin");
-            ByteBuffer nodeBuffer = new int[];
-            channel.read(nodeBuffer, 0);
-            //GraphNodes readNodes = new GraphNodes(nodeBuffer);
+        Path nodePath = basePath.resolve("nodes.bin");
+        try(FileChannel channel = FileChannel.open(nodePath)){
+            nodes = new GraphNodes(channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size()).asIntBuffer());
         }
         catch(IOException){
 
         }
 
         // Sectors
-        try{
-            basePath.;
+        Path sectorPath = basePath.resolve("sector.bin");
+        try(FileChannel channel = FileChannel.open(sectorPath)){
+            sectors = new GraphSectors(channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size()));
         }
         catch(IOException){
 
         }
 
         // Edges
-        try{
-            basePath.;
+        Path edgePath = basePath.resolve("edges.bin");
+        try(FileChannel channel = FileChannel.open(edgePath)){
+
         }
         catch(IOException){
 
@@ -84,7 +83,7 @@ public final class Graph {
      *
      * @return
      */
-    int nodeCount(){
+    public int nodeCount(){
         return nodes.count();
     }
 
@@ -93,7 +92,7 @@ public final class Graph {
      * @param nodeId the ID of the node
      * @return
      */
-    PointCh nodePoint(int nodeId){
+    public PointCh nodePoint(int nodeId){
         return new PointCh(nodes.nodeE(nodeId), nodes.nodeN(nodeId));
     }
 
@@ -102,7 +101,7 @@ public final class Graph {
      * @param nodeId Index of the node
      * @return
      */
-    int nodeOutDegree(int nodeId){
+    public int nodeOutDegree(int nodeId){
         return nodes.outDegree(nodeId);
     }
 
@@ -112,7 +111,7 @@ public final class Graph {
      * @param edgeIndex
      * @return
      */
-    int nodeOutEdgeId(int nodeId, int edgeIndex){
+    public int nodeOutEdgeId(int nodeId, int edgeIndex){
         return nodes.edgeId(nodeId, edgeIndex);
     }
 
@@ -122,7 +121,7 @@ public final class Graph {
      * @param searchDistance
      * @return
      */
-    int nodeClosestTo(PointCh point, double searchDistance){
+    public int nodeClosestTo(PointCh point, double searchDistance){
         ArrayList<GraphSectors.Sector> inArea = sectors.sectorsInArea(point, searchDistance);
         int closestNodeId = -1;
         double minDistance = Math.pow(searchDistance,2);
@@ -143,7 +142,7 @@ public final class Graph {
      * @param edgeId Index of the edge
      * @return the ID of the target node
      */
-    int edgeTargetNodeId(int edgeId){
+    public int edgeTargetNodeId(int edgeId){
         return edges.targetNodeId(edgeId);
     }
 
@@ -152,7 +151,7 @@ public final class Graph {
      * @param edgeId Index of the edge
      * @return
      */
-    boolean edgeIsInverted(int edgeId){
+    public boolean edgeIsInverted(int edgeId){
         return edges.isInverted(edgeId);
     }
 
@@ -161,7 +160,7 @@ public final class Graph {
      * @param edgeId Index of the edge
      * @return
      */
-    AttributeSet edgeAttributes(int edgeId){
+    public AttributeSet edgeAttributes(int edgeId){
         return AttributeSet.of()
     }
 
@@ -170,7 +169,7 @@ public final class Graph {
      * @param edgeId Index of the edge
      * @return
      */
-    double edgeLength(int edgeId){
+    public double edgeLength(int edgeId){
         edges.length(edgeId);
     }
 
@@ -179,7 +178,7 @@ public final class Graph {
      * @param edgeId Index of the edge
      * @return
      */
-    double edgeElevationGain(int edgeId){
+    public double edgeElevationGain(int edgeId){
         return edges.elevationGain(edgeId);
     }
 
@@ -188,7 +187,7 @@ public final class Graph {
      * @param edgeId Index of the edge
      * @return the profile of an edge as a function
      */
-    DoubleUnaryOperator edgeProfile(int edgeId){
+    public DoubleUnaryOperator edgeProfile(int edgeId){
         if(edges.hasProfile(edgeId)){
             return Functions.constant(edgeId);
         }
