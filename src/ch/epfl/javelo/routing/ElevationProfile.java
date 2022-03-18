@@ -36,7 +36,7 @@ public final class ElevationProfile {
     }
 
     /**
-     *
+     * Getter for the length parameter in the class
      * @return the length of the profile in meters
      */
     public double length(){
@@ -44,7 +44,7 @@ public final class ElevationProfile {
     }
 
     /**
-     *
+     * Minimum altitude in the elevationSamples float list
      * @return minimum altitude of the profile in meters
      */
     public double minElevation() {
@@ -52,7 +52,7 @@ public final class ElevationProfile {
     }
 
     /**
-     *
+     * Maximum elevation in the elevationSamples float list
      * @return maximum altitude of the profile in meters
      */
     public double maxElevation(){
@@ -65,7 +65,7 @@ public final class ElevationProfile {
      */
     public double totalAscent(){
         double tempAscent = 0;
-        for (int i = 0; i < elevationSamples.length; i++) {
+        for (int i = 0; i < elevationSamples.length-1; i++) {
 
             if(elevationSamples[i+1] - elevationSamples[i] > 0){
                 tempAscent = tempAscent + elevationSamples[i+1] - elevationSamples[i];
@@ -75,19 +75,19 @@ public final class ElevationProfile {
     }
 
     /**
-     *
+     * Returns the absolute value of the total descent of a profile
      * @return negative incline of the profile in meters
      */
     public double totalDescent(){
 
         double tempDescent = 0;
-        for (int i = 0; i < elevationSamples.length; i++) {
+        for (int i = 0; i < elevationSamples.length-1; i++) {
 
-            if(elevationSamples[i+1] - elevationSamples[i] < 0){
+            if(elevationSamples[i+1] < elevationSamples[i]){
                 tempDescent = tempDescent + elevationSamples[i+1] - elevationSamples[i];
             }
         }
-        return tempDescent;
+        return Math.abs(tempDescent);
 
     }
 
@@ -97,14 +97,7 @@ public final class ElevationProfile {
      * @return The elevation at the given position
      */
     public double elevationAt(double position){
-
-        if (position < 0) {
-            return elevationSamples[0];
-        }
-        else {
-            return Functions.sampled(elevationSamples, maxElevation()).applyAsDouble(position);
-        }
-
+            return Functions.sampled(elevationSamples, length).applyAsDouble(position);
     }
 
 
