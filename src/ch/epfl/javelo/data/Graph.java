@@ -6,6 +6,8 @@ import ch.epfl.javelo.projection.PointCh;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.nio.LongBuffer;
+import java.nio.ShortBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -48,35 +50,47 @@ public final class Graph {
      * @throws IOException
      */
     static Graph loadFrom(Path basePath) throws IOException {
-        // Nodes
         Path nodePath = basePath.resolve("nodes.bin");
+        IntBuffer nodeBuffer;
         try(FileChannel channel = FileChannel.open(nodePath)){
-            nodes = new GraphNodes(channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size()).asIntBuffer());
-        }
-        catch(IOException){
-
+            nodeBuffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size()).asIntBuffer();
         }
 
-        // Sectors
         Path sectorPath = basePath.resolve("sector.bin");
+        ByteBuffer sectorBuffer;
         try(FileChannel channel = FileChannel.open(sectorPath)){
-            sectors = new GraphSectors(channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size()));
-        }
-        catch(IOException){
-
+            sectorBuffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
         }
 
-        // Edges
         Path edgePath = basePath.resolve("edges.bin");
+        ByteBuffer edgeBuffer;
         try(FileChannel channel = FileChannel.open(edgePath)){
-
-        }
-        catch(IOException){
-
+            edgeBuffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
         }
 
-        return new Graph(nodes, sectors, edges, attributeSets);
+        Path profileIdPath = basePath.resolve("profile_ids.bin");
+        IntBuffer proIdBuffer;
+        try(FileChannel channel = FileChannel.open(profileIdPath)){
+            proIdBuffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size()).asIntBuffer();
+        }
 
+        Path elevationPath = basePath.resolve("elevations.bin");
+        ShortBuffer elevationBuffer;
+        try(FileChannel channel = FileChannel.open(elevationPath)){
+            elevationBuffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size()).asShortBuffer();
+        }
+
+        Path attributePath = basePath.resolve("attributes.bin");
+        LongBuffer attributeBuffer;
+        try(FileChannel channel = FileChannel.open(attributePath)){
+            attributeBuffer = channel.map(FileChannel.MapMode.READ_ONLY,0, channel.size()).asLongBuffer();
+        }
+        ArrayList<AttributeSet> attributeSet = new ArrayList<>();
+        for (int i = 0; i < attributeBuffer.capacity(); i++) {
+            attributeSet.add(new AttributeSet(attributeBuffer.get(i)));
+        }
+
+        return new Graph(new GraphNodes(nodeBuffer), new GraphSectors(sectorBuffer), new GraphEdges(edgeBuffer, proIdBuffer, elevationBuffer), attributeSet);
     }
 
     /**
@@ -161,7 +175,7 @@ public final class Graph {
      * @return
      */
     public AttributeSet edgeAttributes(int edgeId){
-        return AttributeSet.of()
+        return new AttributeSet(edges.attributesIndex(edgeId));
     }
 
     /**
@@ -170,7 +184,7 @@ public final class Graph {
      * @return
      */
     public double edgeLength(int edgeId){
-        edges.length(edgeId);
+        return edges.length(edgeId);
     }
 
     /**
