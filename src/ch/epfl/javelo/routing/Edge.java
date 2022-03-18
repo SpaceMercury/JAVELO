@@ -37,7 +37,7 @@ public record Edge(int fromNodeID, int toNodeID, PointCh fromPoint, PointCh toPo
 
 
     /**
-     * Getter for the NodeId of the beggining node
+     * Getter for the NodeId of the beginning node
      * @return Id of the Node
      */
     public int fromNodeId() {
