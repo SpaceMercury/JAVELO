@@ -25,16 +25,14 @@ public record Edge(int fromNodeID, int toNodeID, PointCh fromPoint, PointCh toPo
         return Math2.projectionLength(fromPoint.e(), fromPoint.n(), toPoint.e(), toPoint.n(), point.e(), point.n());
     }
 
-
     public PointCh pointAt(double position){
-        return new PointCh(Math2.interpolate(fromPoint.n(),toPoint.n(),position), toPoint.n());
+        return new PointCh(fromPoint.e() + ((position/length) * (toPoint.e()-fromPoint.e()) ), fromPoint.n() + ((position/length) * (toPoint.n()-fromPoint.n())));
     }
 
 
     public double elevationAt(double position){
         return profile.applyAsDouble(position);
     }
-
 
     /**
      * Getter for the NodeId of the beginning node
