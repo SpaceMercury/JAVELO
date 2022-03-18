@@ -6,7 +6,7 @@ import ch.epfl.javelo.projection.PointCh;
 
 import java.util.function.DoubleUnaryOperator;
 
-public record Edge(int fromNodeID, int toNodeID, PointCh fromPoint, PointCh toPoint, double length, DoubleUnaryOperator profile) {
+public record Edge(int fromNodeId, int toNodeId, PointCh fromPoint, PointCh toPoint, double length, DoubleUnaryOperator profile) {
 
 
     /**
