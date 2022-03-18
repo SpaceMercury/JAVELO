@@ -22,7 +22,7 @@ public record Edge(int fromNodeID, int toNodeID, PointCh fromPoint, PointCh toPo
         return new Edge(fromNodeId, toNodeId, graph.nodePoint(fromNodeId) ,graph.nodePoint(toNodeId) , graph.edgeLength(edgeId), graph.edgeProfile(edgeId));
     }
     public double positionClosestTo(PointCh point){
-        Math2.projectionLength();
+        return Math2.projectionLength(fromPoint.e(), fromPoint.n(), toPoint.e(), toPoint.n(), point.e(), point.n());
     }
 
 
@@ -32,7 +32,7 @@ public record Edge(int fromNodeID, int toNodeID, PointCh fromPoint, PointCh toPo
 
 
     public double elevationAt(double position){
-//        ElevationProfile.elevationAt(position);
+        return profile.applyAsDouble(position);
     }
 
 
