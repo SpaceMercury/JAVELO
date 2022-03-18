@@ -29,24 +29,7 @@ public record Edge(int fromNodeID, int toNodeID, PointCh fromPoint, PointCh toPo
         return new PointCh(fromPoint.e() + ((position/length) * (toPoint.e()-fromPoint.e()) ), fromPoint.n() + ((position/length) * (toPoint.n()-fromPoint.n())));
     }
 
-
     public double elevationAt(double position){
         return profile.applyAsDouble(position);
-    }
-
-    /**
-     * Getter for the NodeId of the beginning node
-     * @return Id of the Node
-     */
-    public int fromNodeId() {
-        return fromNodeID;
-    }
-
-    /**
-     * Getter for the NodeId of the destination
-     * @return Id of the Node
-     */
-    public int toNodeId() {
-        return toNodeID;
     }
 }

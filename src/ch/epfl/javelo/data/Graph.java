@@ -49,7 +49,7 @@ public final class Graph {
      * @return a new Graph with the attributes which have been loaded from the bin files
      * @throws IOException
      */
-    static Graph loadFrom(Path basePath) throws IOException {
+    public static Graph loadFrom(Path basePath) throws IOException {
         Path nodePath = basePath.resolve("nodes.bin");
         IntBuffer nodeBuffer;
         try(FileChannel channel = FileChannel.open(nodePath)){
