@@ -56,7 +56,7 @@ public final class Graph {
             nodeBuffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size()).asIntBuffer();
         }
 
-        Path sectorPath = basePath.resolve("sector.bin");
+        Path sectorPath = basePath.resolve("sectors.bin");
         ByteBuffer sectorBuffer;
         try(FileChannel channel = FileChannel.open(sectorPath)){
             sectorBuffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
@@ -203,7 +203,7 @@ public final class Graph {
      */
     public DoubleUnaryOperator edgeProfile(int edgeId){
         if(edges.hasProfile(edgeId)){
-            return Functions.constant(edgeId);
+            return Functions.sampled(edges.profileSamples(edgeId), edgeLength(edgeId));
         }
         else{
             return Functions.constant(Double.NaN);

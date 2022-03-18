@@ -6,9 +6,7 @@ import ch.epfl.javelo.Preconditions;
 /**
  * @author vince
  */
-public class PointCh {
-    private double e;
-    private double n;
+public record PointCh(double e, double n) {
 
     /**
      * Constructor return IllegalArgumentException if the coordinates are not
@@ -16,10 +14,8 @@ public class PointCh {
      * @param e displacement on the horizontal axis with Bern as the origin  (equivalent of x coordinate of point)
      * @param n displacement on the vertical axis with Bern as the origin (equivalent of y coordinate of point)
      */
-    public PointCh(double e, double n) {
+    public PointCh{
         Preconditions.checkArgument(SwissBounds.containsEN(e, n));
-        this.e = e;
-        this.n = n;
     }
 
     /**
@@ -56,7 +52,4 @@ public class PointCh {
         return Ch1903.lat(this.e, this.n);
     }
 
-    public double e() {return this.e;}
-
-    public double n() {return this.n;}
 }
