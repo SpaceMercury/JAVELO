@@ -28,12 +28,14 @@ public final class SingleRoute implements Route{
      */
     @Override
     public int indexOfSegmentAt(double position) {
-
+        /**double segmentStart = 0, segmentEnd = 0;
         for (int i = 0; i < edges.size() - 1 ; i++) {
-            if( position >= edges.get(1).length() && position <= edges.get(i+1).length()){
-                return i;
+            segmentEnd += edges.get(i).length();
+            if(position >= segmentStart && position <= segmentEnd && i >= 1){
+                return i - 1;
             }
-        }
+            segmentStart = segmentEnd;
+        }*/
         return 0;
     }
 
@@ -79,8 +81,14 @@ public final class SingleRoute implements Route{
      * @return the point at the given position of the itinerary
      */
     @Override
+    //TODO: Ask what to do if position is bigger than the segment length.
     public PointCh pointAt(double position) {
-        return null;
+        int edgeNumber = 0;
+        while(position - edges.get(edgeNumber).length() >= 0){
+            position -= edges.get(edgeNumber).length();
+            edgeNumber++;
+        }
+        return edges.get(edgeNumber).pointAt(position);
     }
 
     /**

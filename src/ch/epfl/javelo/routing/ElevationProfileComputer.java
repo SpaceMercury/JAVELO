@@ -24,7 +24,7 @@ public final class ElevationProfileComputer {
     public static ElevationProfile elevationProfile(Route route, double maxStepLength){
         Preconditions.checkArgument(maxStepLength > 0);
 
-        int sampleNumber = (int) Math.ceil(route.length()/maxStepLength) + 1;
+        int sampleNumber = ((int) Math.ceil(route.length()/maxStepLength)) + 1;
         float[] road = new float[sampleNumber];
         for(int i = 0; i < sampleNumber; i++){
             road[i] = (float) route.elevationAt(maxStepLength*i);
