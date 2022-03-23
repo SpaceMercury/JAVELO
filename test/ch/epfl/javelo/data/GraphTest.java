@@ -1,8 +1,8 @@
 package ch.epfl.javelo.data;
 
-import ch.epfl.javelo.Functions;
-import ch.epfl.javelo.projection.Ch1903;
 import ch.epfl.javelo.projection.PointCh;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -11,185 +11,387 @@ import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.function.DoubleUnaryOperator;
 
-import static ch.epfl.javelo.data.Attribute.HIGHWAY_SERVICE;
-import static org.junit.jupiter.api.Assertions.*;
+import static ch.epfl.test.TestRandomizer.RANDOM_ITERATIONS;
+import static ch.epfl.test.TestRandomizer.newRandom;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GraphTest {
 
+    private static final int SUBDIVISIONS_PER_SIDE = 128;
+    private static final int SECTORS_COUNT = SUBDIVISIONS_PER_SIDE * SUBDIVISIONS_PER_SIDE;
 
-    public GraphEdges graphEdges(){
-        ByteBuffer edgesBuffer = ByteBuffer.allocate(10);
+    private static final ByteBuffer SECTORS_BUFFER = createSectorsBuffer();
 
-
-//        IntBuffer profileIds = IntBuffer.wrap(new int[]{
-//                // Type : 3. Index du premier échantillon : 1.
-//                (3 << 30) | 1
-//        });
-
-        IntBuffer profileIds = IntBuffer.wrap(new int[]{(3 << 30) | 1});
-
-
-        ShortBuffer elevations = ShortBuffer.wrap(new short[]{
-                (short) 0,
-                (short) 0x180C, (short) 0xFEFF,
-                (short) 0xFFFE, (short) 0xF000,
-                (short) 0xFEFF, (short) 0xFFFE,
-                (short) 0xF000, (short) 0xFEFF,
-                (short) 0xFFFE, (short) 0xF000,
-                (short) 0xFEFF, (short) 0xFFFE,
-                (short) 0xF000,
-
-        });
-
-        edgesBuffer.putInt(0, ~12);
-        edgesBuffer.putShort(4, (short) 0x10_b);
-        edgesBuffer.putShort(6, (short) 0x10_0);
-        edgesBuffer.putShort(8, (short) 2022);
-
-        return new GraphEdges(edgesBuffer,profileIds,elevations);
-    }
-
-    public GraphNodes graphNodes(){
-        IntBuffer b = IntBuffer.wrap(new int[]{2485000 << 4, 1075000 << 4, 9});
-
-        return new GraphNodes(b);
-    }
-
-    public GraphNodes graphNodes1(){
-        IntBuffer b1 = IntBuffer.wrap(new int[]{
-                2_600_000 << 4,
-                1_200_000 << 4,
-                0x2_000_1234
-        });
-        return new GraphNodes(b1);
-    }
-
-    public GraphSectors graphSectors(){
-
-        ByteBuffer buffer = ByteBuffer.allocate(6 * 16684);
-
-        for (int i = 0; i <= 16683; i += 1) {
-            buffer.putInt(i * 6, i);
+    private static ByteBuffer createSectorsBuffer() {
+        ByteBuffer sectorsBuffer = ByteBuffer.allocate(SECTORS_COUNT * (Integer.BYTES + Short.BYTES));
+        for (int i = 0; i < SECTORS_COUNT; i += 1) {
+            sectorsBuffer.putInt(i);
+            sectorsBuffer.putShort((short) 1);
         }
-
-        for (int j = 0; j <= 16683; j += 1) {
-            buffer.putShort(j * 6 + 4, (short) 5);
-        }
-
-        return new GraphSectors(buffer);
-    }
-
-    public List<AttributeSet> ListOfAttributeSet(){
-        AttributeSet set1 = AttributeSet.of(Attribute.HIGHWAY_UNCLASSIFIED, Attribute.HIGHWAY_TRACK, Attribute.HIGHWAY_CYCLEWAY, Attribute.LCN_YES);
-        AttributeSet set2 = AttributeSet.of(HIGHWAY_SERVICE,Attribute.HIGHWAY_UNCLASSIFIED,Attribute.ONEWAY_BICYCLE_NO);
-        List<AttributeSet> listOfAttributeSet = new ArrayList<AttributeSet>();
-        listOfAttributeSet.add(set1);
-        listOfAttributeSet.add(set2);
-
-        return listOfAttributeSet;
-    }
-
-    Graph graph1 = new Graph(graphNodes(),graphSectors(),graphEdges(),ListOfAttributeSet());
-    Graph graph2 = new Graph(graphNodes1(),graphSectors(),graphEdges(),ListOfAttributeSet());
-    @Test
-    void loadFrom() {
+        assert !sectorsBuffer.hasRemaining();
+        return sectorsBuffer.rewind().asReadOnlyBuffer();
     }
 
     @Test
-    void nodeCount() {
-        assertEquals(1,graph1.nodeCount());
-        assertEquals(1,graph2.nodeCount());
+    void graphLoadFromWorksOnLausanneData() throws IOException {
+        var graph = Graph.loadFrom(Path.of("lausanne"));
+
+        // Check that nodes.bin was properly loaded
+        var actual1 = graph.nodeCount();
+        var expected1 = 212679;
+        assertEquals(expected1, actual1);
+
+        var actual2 = graph.nodeOutEdgeId(2022, 0);
+        var expected2 = 4095;
+        assertEquals(expected2, actual2);
+
+        // Check that edges.bin was properly loaded
+        var actual3 = graph.edgeLength(2022);
+        var expected3 = 17.875;
+        assertEquals(expected3, actual3);
+
+        // Check that profile_ids.bin and elevations.bin was properly loaded
+        var actual4 = graph.edgeProfile(2022).applyAsDouble(0);
+        var expected4 = 625.5625;
+        assertEquals(expected4, actual4);
+
+        // Check that attributes.bin and elevations.bin was properly loaded
+        var actual5 = graph.edgeAttributes(2022).bits();
+        var expected5 = 16;
+        assertEquals(expected5, actual5);
     }
 
     @Test
-    void nodePoint() {
-        assertEquals(new PointCh(2_485_000,1075000),graph1.nodePoint(0));
-        assertEquals(new PointCh(2_600_000,1_200_000),graph2.nodePoint(0));
-    }
+    void graphNodeCountWorksFrom0To99() {
+        var edgesCount = 10;
+        var edgesBuffer = ByteBuffer.allocate(10 * edgesCount);
+        var profileIds = IntBuffer.allocate(edgesCount);
+        var elevations = ShortBuffer.allocate(10);
+        var graphSectors = new GraphSectors(SECTORS_BUFFER);
+        var graphEdges = new GraphEdges(edgesBuffer, profileIds, elevations);
+        var attributeSets = List.<AttributeSet>of();
 
-    @Test
-    void nodeOutDegree() {
-        assertEquals(2,graph2.nodeOutDegree(0));
-    }
+        for (int count = 0; count < 100; count += 1) {
+            var buffer = IntBuffer.allocate(3 * count);
+            var graphNodes = new GraphNodes(buffer);
 
-    @Test
-    void nodeOutEdgeId() {
-        assertEquals(0x1234, graph2.nodeOutEdgeId(0,0));
-        assertEquals(0x1235, graph2.nodeOutEdgeId(0,1));    }
-
-    /*@Test
-    void nodeClosestTo() {
-        assertEquals(new PointCh(2_485_000,1075000),graph1.nodeClosestTo(new PointCh(2_485_047,1075000),50));
-    }*/
-
-    @Test
-    void edgeIsInverted() {
-        assertTrue(graph1.edgeIsInverted(0));    }
-
-    @Test
-    void edgeTargetNodeId() {
-        assertEquals(12,graph1.edgeTargetNodeId(0));
-    }
-
-
-    @Test
-    void edgeAttributes() {
-
-    }
-
-    @Test
-    void edgeLength() {
-        assertEquals(16.6875,graph1.edgeLength(0));
-    }
-
-    @Test
-    void edgeElevationGain() {
-        assertEquals(16.0,graph1.edgeElevationGain(0));
-    }
-
-    @Test
-    void edgeProfile() {
-        double max = 10;
-        DoubleUnaryOperator f = Functions.sampled(new float[]{
-                384.0625f, 384.125f, 384.25f, 384.3125f, 384.375f,
-                384.4375f, 384.5f, 384.5625f, 384.6875f, 384.75f}, 10);
-
-        for(int i=0; i<10;++i){
-            assertEquals(f.applyAsDouble(i),graph1.edgeProfile(0).applyAsDouble(i));
+            var graph = new Graph(graphNodes, graphSectors, graphEdges, attributeSets);
+            assertEquals(count, graph.nodeCount());
         }
     }
 
     @Test
-    void nodeClosestToTest(){
-        Graph graph = generateLausanneGraph();
+    void graphNodePointWorksOnRandomValues() {
+        var edgesCount = 10;
+        var edgesBuffer = ByteBuffer.allocate(10 * edgesCount);
+        var profileIds = IntBuffer.allocate(edgesCount);
+        var elevations = ShortBuffer.allocate(10);
+        var graphSectors = new GraphSectors(SECTORS_BUFFER);
+        var graphEdges = new GraphEdges(edgesBuffer, profileIds, elevations);
+        var attributeSets = List.<AttributeSet>of();
 
-        int nodeId1 = 0; // 1684019323
-        int nodeId2 = 123_567; // 3761311896
-        int nodeId3 = graph.nodeCount() -1; // 5475839472
+        var nodesCount = 10_000;
+        var buffer = IntBuffer.allocate(3 * nodesCount);
+        var rng = newRandom();
+        for (int i = 0; i < RANDOM_ITERATIONS; i += 1) {
+            var e = 2_600_000 + 50_000 * rng.nextDouble();
+            var n = 1_200_000 + 50_000 * rng.nextDouble();
+            var e_q28_4 = (int) Math.scalb(e, 4);
+            var n_q28_4 = (int) Math.scalb(n, 4);
+            e = Math.scalb((double) e_q28_4, -4);
+            n = Math.scalb((double) n_q28_4, -4);
+            var nodeId = rng.nextInt(nodesCount);
+            buffer.put(3 * nodeId, e_q28_4);
+            buffer.put(3 * nodeId + 1, n_q28_4);
+            var graphNodes = new GraphNodes(buffer);
 
-        PointCh node1 = new PointCh(Ch1903.e(Math.toRadians(6.7761194), Math.toRadians(46.6455770)), Ch1903.n(Math.toRadians(6.7761194), Math.toRadians(46.6455770)));
-        PointCh node2 = new PointCh(Ch1903.e(Math.toRadians(6.6291292), Math.toRadians(46.5235985)), Ch1903.n(Math.toRadians(6.6291292), Math.toRadians(46.5235985)));
-        PointCh node3 = new PointCh(Ch1903.e(Math.toRadians(6.4789731), Math.toRadians(46.6422279)), Ch1903.n(Math.toRadians(6.4789731), Math.toRadians(46.6422279)));
-
-        PointCh pointNearNode1 = new PointCh(node1.e() - 20, node1.n());
-
-        assertEquals(nodeId1, graph.nodeClosestTo(node1, 100));
-        assertEquals(nodeId2, graph.nodeClosestTo(node2, 100));
-        assertEquals(nodeId3, graph.nodeClosestTo(node3, 100));
-        assertEquals(nodeId1, graph.nodeClosestTo(pointNearNode1, 20));
-        assertEquals(-1, graph.nodeClosestTo(pointNearNode1, 19));
+            var graph = new Graph(graphNodes, graphSectors, graphEdges, attributeSets);
+            assertEquals(new PointCh(e, n), graph.nodePoint(nodeId));
+        }
     }
 
-    private Graph generateLausanneGraph(){
-        Path basePath = Path.of("lausanne");
-        Graph graph = null;
-        try{ graph = Graph.loadFrom(basePath);}
-        catch (IOException e){
-            e.printStackTrace();
-            fail();}
-        return graph;
+    @Test
+    void graphNodeOutDegreeWorksOnRandomValues() {
+        var edgesCount = 10;
+        var edgesBuffer = ByteBuffer.allocate(10 * edgesCount);
+        var profileIds = IntBuffer.allocate(edgesCount);
+        var elevations = ShortBuffer.allocate(10);
+        var graphSectors = new GraphSectors(SECTORS_BUFFER);
+        var graphEdges = new GraphEdges(edgesBuffer, profileIds, elevations);
+        var attributeSets = List.<AttributeSet>of();
+
+        var nodesCount = 10_000;
+        var buffer = IntBuffer.allocate(3 * nodesCount);
+        var rng = newRandom();
+        for (int outDegree = 0; outDegree < 16; outDegree += 1) {
+            var firstEdgeId = rng.nextInt(1 << 28);
+            var nodeId = rng.nextInt(nodesCount);
+            buffer.put(3 * nodeId + 2, (outDegree << 28) | firstEdgeId);
+            var graphNodes = new GraphNodes(buffer);
+            var graph = new Graph(graphNodes, graphSectors, graphEdges, attributeSets);
+            assertEquals(outDegree, graph.nodeOutDegree(nodeId));
+        }
+    }
+
+    @Test
+    void graphNodeOutEdgeIdWorksOnRandomValues() {
+        var edgesCount = 10;
+        var edgesBuffer = ByteBuffer.allocate(10 * edgesCount);
+        var profileIds = IntBuffer.allocate(edgesCount);
+        var elevations = ShortBuffer.allocate(10);
+        var graphSectors = new GraphSectors(SECTORS_BUFFER);
+        var graphEdges = new GraphEdges(edgesBuffer, profileIds, elevations);
+        var attributeSets = List.<AttributeSet>of();
+
+        var nodesCount = 10_000;
+        var buffer = IntBuffer.allocate(3 * nodesCount);
+        var rng = newRandom();
+        for (int outDegree = 0; outDegree < 16; outDegree += 1) {
+            var firstEdgeId = rng.nextInt(1 << 28);
+            var nodeId = rng.nextInt(nodesCount);
+            buffer.put(3 * nodeId + 2, (outDegree << 28) | firstEdgeId);
+            var graphNodes = new GraphNodes(buffer);
+            var graph = new Graph(graphNodes, graphSectors, graphEdges, attributeSets);
+
+            for (int i = 0; i < outDegree; i += 1)
+                assertEquals(firstEdgeId + i, graph.nodeOutEdgeId(nodeId, i));
+        }
+    }
+
+    @Test
+    void graphNodeClosestToWorksOnLausanneData() throws IOException {
+        var graph = Graph.loadFrom(Path.of("lausanne"));
+
+        var actual1 = graph.nodeClosestTo(new PointCh(2_532_734.8, 1_152_348.0), 100);
+        var expected1 = 159049;
+        assertEquals(expected1, actual1);
+
+        var actual2 = graph.nodeClosestTo(new PointCh(2_538_619.9, 1_154_088.0), 100);
+        var expected2 = 117402;
+        assertEquals(expected2, actual2);
+
+        var actual3 = graph.nodeClosestTo(new PointCh(2_600_000, 1_200_000), 100);
+        var expected3 = -1;
+        assertEquals(expected3, actual3);
+    }
+
+    @Test
+    void graphEdgeTargetNodeIdWorksOnRandomValues() {
+        var nodesCount = 10;
+        var nodesBuffer = IntBuffer.allocate(3 * nodesCount);
+        var graphNodes = new GraphNodes(nodesBuffer);
+        var graphSectors = new GraphSectors(SECTORS_BUFFER);
+        var attributeSets = List.<AttributeSet>of();
+
+        var edgesCount = 10_000;
+        var edgesBuffer = ByteBuffer.allocate(10 * edgesCount);
+        var profileIds = IntBuffer.allocate(edgesCount);
+        var elevations = ShortBuffer.allocate(10);
+        var rng = newRandom();
+        for (int i = 0; i < RANDOM_ITERATIONS; i += 1) {
+            var targetNodeId = rng.nextInt();
+            var edgeId = rng.nextInt(edgesCount);
+            edgesBuffer.putInt(10 * edgeId, targetNodeId);
+            var graphEdges = new GraphEdges(edgesBuffer, profileIds, elevations);
+            var graph = new Graph(graphNodes, graphSectors, graphEdges, attributeSets);
+            var expectedTargetNodeId = targetNodeId < 0 ? ~targetNodeId : targetNodeId;
+            assertEquals(expectedTargetNodeId, graph.edgeTargetNodeId(edgeId));
+        }
+    }
+
+    @Test
+    void graphEdgeIsInvertedWorksForPlusMinus100() {
+        var nodesCount = 10;
+        var nodesBuffer = IntBuffer.allocate(3 * nodesCount);
+        var graphNodes = new GraphNodes(nodesBuffer);
+        var graphSectors = new GraphSectors(SECTORS_BUFFER);
+        var attributeSets = List.<AttributeSet>of();
+
+        var edgesCount = 10_000;
+        var edgesBuffer = ByteBuffer.allocate(10 * edgesCount);
+        var profileIds = IntBuffer.allocate(edgesCount);
+        var elevations = ShortBuffer.allocate(10);
+        var rng = newRandom();
+        for (int targetNodeId = -100; targetNodeId < 100; targetNodeId += 1) {
+            var edgeId = rng.nextInt(edgesCount);
+            edgesBuffer.putInt(10 * edgeId, targetNodeId);
+            var graphEdges = new GraphEdges(edgesBuffer, profileIds, elevations);
+            var graph = new Graph(graphNodes, graphSectors, graphEdges, attributeSets);
+            assertEquals(targetNodeId < 0, graph.edgeIsInverted(edgeId));
+        }
+    }
+
+    @Test
+    void graphEdgeAttributesWorksOnRandomValues() {
+        var nodesCount = 10;
+        var nodesBuffer = IntBuffer.allocate(3 * nodesCount);
+        var graphNodes = new GraphNodes(nodesBuffer);
+        var graphSectors = new GraphSectors(SECTORS_BUFFER);
+
+        var attributeSetsCount = 3 * RANDOM_ITERATIONS;
+        var rng = newRandom();
+        var attributeSets = new ArrayList<AttributeSet>(attributeSetsCount);
+        for (int i = 0; i < attributeSetsCount; i += 1) {
+            var attributeSetBits = rng.nextLong(1L << 62);
+            attributeSets.add(new AttributeSet(attributeSetBits));
+        }
+        var unmodifiableAttributeSets = Collections.unmodifiableList(attributeSets);
+
+        var edgesCount = 10_000;
+        var edgesBuffer = ByteBuffer.allocate(10 * edgesCount);
+        var profileIds = IntBuffer.allocate(edgesCount);
+        var elevations = ShortBuffer.allocate(10);
+        for (int i = 0; i < RANDOM_ITERATIONS; i += 1) {
+            var edgeId = rng.nextInt(edgesCount);
+            var attributeSetIndex = (short) rng.nextInt(attributeSetsCount);
+            edgesBuffer.putShort(10 * edgeId + 8, attributeSetIndex);
+            var graphEdges = new GraphEdges(edgesBuffer, profileIds, elevations);
+            var graph = new Graph(graphNodes, graphSectors, graphEdges, unmodifiableAttributeSets);
+            assertEquals(
+                    unmodifiableAttributeSets.get(attributeSetIndex),
+                    graph.edgeAttributes(edgeId));
+        }
+    }
+
+    @Test
+    void graphConstructorCopiesAttributesListToEnsureImmutability() {
+        var nodesCount = 10;
+        var nodesBuffer = IntBuffer.allocate(3 * nodesCount);
+        var graphNodes = new GraphNodes(nodesBuffer);
+        var graphSectors = new GraphSectors(SECTORS_BUFFER);
+
+        var attributeSet = new AttributeSet(0b1111L);
+        var attributeSets = new ArrayList<>(List.of(attributeSet));
+        var unmodifiableAttributeSets = Collections.unmodifiableList(attributeSets);
+
+        var edgesCount = 1;
+        var edgesBuffer = ByteBuffer.allocate(10 * edgesCount);
+        var profileIds = IntBuffer.allocate(edgesCount);
+        var elevations = ShortBuffer.allocate(10);
+        edgesBuffer.putShort(8, (short) 0);
+        var graphEdges = new GraphEdges(edgesBuffer, profileIds, elevations);
+        var graph = new Graph(graphNodes, graphSectors, graphEdges, unmodifiableAttributeSets);
+        attributeSets.set(0, new AttributeSet(0L));
+        assertEquals(attributeSet, graph.edgeAttributes(0));
+    }
+
+    @Test
+    void graphEdgeLengthWorksOnRandomValues() {
+        var nodesCount = 10;
+        var nodesBuffer = IntBuffer.allocate(3 * nodesCount);
+        var graphNodes = new GraphNodes(nodesBuffer);
+        var graphSectors = new GraphSectors(SECTORS_BUFFER);
+
+        var edgesCount = 10_000;
+        var edgesBuffer = ByteBuffer.allocate(10 * edgesCount);
+        var profileIds = IntBuffer.allocate(edgesCount);
+        var elevations = ShortBuffer.allocate(10);
+        var rng = newRandom();
+        for (int i = 0; i < RANDOM_ITERATIONS; i += 1) {
+            var edgeId = rng.nextInt(edgesCount);
+            var length = rng.nextDouble(1 << 12);
+            var length_q12_4 = (int) Math.scalb(length, 4);
+            length = Math.scalb((double) length_q12_4, -4);
+            edgesBuffer.putShort(10 * edgeId + 4, (short) length_q12_4);
+            var graphEdges = new GraphEdges(edgesBuffer, profileIds, elevations);
+            var graph = new Graph(graphNodes, graphSectors, graphEdges, List.of());
+
+            assertEquals(length, graph.edgeLength(edgeId));
+        }
+    }
+
+    @Test
+    void graphEdgeElevationGainWorksOnRandomValues() {
+        var nodesCount = 10;
+        var nodesBuffer = IntBuffer.allocate(3 * nodesCount);
+        var graphNodes = new GraphNodes(nodesBuffer);
+        var graphSectors = new GraphSectors(SECTORS_BUFFER);
+
+        var edgesCount = 10_000;
+        var edgesBuffer = ByteBuffer.allocate(10 * edgesCount);
+        var profileIds = IntBuffer.allocate(edgesCount);
+        var elevations = ShortBuffer.allocate(10);
+        var rng = newRandom();
+        for (int i = 0; i < RANDOM_ITERATIONS; i += 1) {
+            var edgeId = rng.nextInt(edgesCount);
+            var elevationGain = rng.nextDouble(1 << 12);
+            var elevationGain_q12_4 = (int) Math.scalb(elevationGain, 4);
+            elevationGain = Math.scalb((double) elevationGain_q12_4, -4);
+            edgesBuffer.putShort(10 * edgeId + 6, (short) elevationGain_q12_4);
+            var graphEdges = new GraphEdges(edgesBuffer, profileIds, elevations);
+            var graph = new Graph(graphNodes, graphSectors, graphEdges, List.of());
+
+            assertEquals(elevationGain, graph.edgeElevationGain(edgeId));
+        }
+    }
+
+    @Test
+    void graphEdgeProfileWorksForType0() {
+        var nodesCount = 10;
+        var nodesBuffer = IntBuffer.allocate(3 * nodesCount);
+        var graphNodes = new GraphNodes(nodesBuffer);
+        var graphSectors = new GraphSectors(SECTORS_BUFFER);
+
+        var edgesCount = 10_000;
+        var elevationsCount = 25_000;
+        var edgesBuffer = ByteBuffer.allocate(10 * edgesCount);
+        var profileIds = IntBuffer.allocate(edgesCount);
+        var elevations = ShortBuffer.allocate(elevationsCount);
+        var rng = newRandom();
+        for (int i = 0; i < RANDOM_ITERATIONS; i += 1) {
+            var edgeId = rng.nextInt(edgesCount);
+            var firstSampleIndex = rng.nextInt(elevationsCount);
+            profileIds.put(edgeId, firstSampleIndex);
+            var graphEdges = new GraphEdges(edgesBuffer, profileIds, elevations);
+            var graph = new Graph(graphNodes, graphSectors, graphEdges, List.of());
+            var edgeProfile = graph.edgeProfile(edgeId);
+            assertTrue(Double.isNaN(edgeProfile.applyAsDouble(-1)));
+            assertTrue(Double.isNaN(edgeProfile.applyAsDouble(0)));
+            assertTrue(Double.isNaN(edgeProfile.applyAsDouble(1000)));
+        }
+    }
+
+    @Test
+    void graphEdgeProfileWorksForType1() {
+        var nodesCount = 10;
+        var nodesBuffer = IntBuffer.allocate(3 * nodesCount);
+        var graphNodes = new GraphNodes(nodesBuffer);
+        var graphSectors = new GraphSectors(SECTORS_BUFFER);
+
+        var elevationsCount = 500;
+        var edgesBuffer = ByteBuffer.allocate(10);
+        var profileIds = IntBuffer.allocate(1);
+        var elevations = ShortBuffer.allocate(elevationsCount);
+        var rng = newRandom();
+        for (int i = 0; i < elevationsCount; i += 1)
+            elevations.put(i, (short) rng.nextInt(1 << 16));
+        for (int i = 0; i < RANDOM_ITERATIONS; i += 1) {
+            var inverted = rng.nextBoolean();
+            var sampleCount = rng.nextInt(2, 100);
+            var firstSampleIndex = rng.nextInt(elevationsCount - sampleCount);
+            var edgeLength_q28_4 = (2 * (sampleCount - 1)) << 4;
+            edgesBuffer.putInt(0, inverted ? ~0 : 0);
+            edgesBuffer.putShort(4, (short) edgeLength_q28_4);
+            profileIds.put(0, (1 << 30) | firstSampleIndex);
+            var graphEdges = new GraphEdges(edgesBuffer.asReadOnlyBuffer(), profileIds.asReadOnlyBuffer(), elevations.asReadOnlyBuffer());
+            var graph = new Graph(graphNodes, graphSectors, graphEdges, List.of());
+            var edgeProfile = graph.edgeProfile(0);
+
+            for (int j = 0; j < sampleCount; j += 1) {
+                var elevation = Math.scalb(Short.toUnsignedInt(elevations.get(firstSampleIndex + j)), -4);
+                if (inverted) {
+                    var x = (sampleCount - 1 - j) * Math.scalb((double)edgeLength_q28_4, -4) / (sampleCount - 1);
+                    assertEquals(elevation, edgeProfile.applyAsDouble(x), 1e-7);
+                }
+                else {
+                    var x = j * Math.scalb((double)edgeLength_q28_4, -4) / (sampleCount - 1);
+                    assertEquals(elevation, edgeProfile.applyAsDouble(x), 1e-7);
+                }
+            }
+        }
     }
 }

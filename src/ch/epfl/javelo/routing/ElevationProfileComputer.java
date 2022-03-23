@@ -5,7 +5,7 @@ import ch.epfl.javelo.Preconditions;
 
 import java.util.Arrays;
 
-import static java.lang.Float.NaN;
+import static java.lang.Float.isNaN;
 
 /**
  * @author ventura
@@ -31,7 +31,7 @@ public final class ElevationProfileComputer {
         }
 
         int firstValid = 0;
-        while(road[firstValid] == NaN && firstValid < sampleNumber - 1){
+        while(isNaN(road[firstValid]) && firstValid < sampleNumber - 1){
             firstValid++;
         }
         if(firstValid < sampleNumber - 1) {
@@ -40,7 +40,7 @@ public final class ElevationProfileComputer {
             Arrays.fill(road, 0, firstValid, 0);
         }
         int lastValid = sampleNumber - 1;
-        while(road[lastValid] == NaN){
+        while(isNaN(road[lastValid])){
             lastValid--;
         }
         Arrays.fill(road, lastValid + 1, sampleNumber, road[lastValid]);
@@ -53,17 +53,15 @@ public final class ElevationProfileComputer {
          * are no holes.
          */
         for(int i = firstValid; i <= lastValid; i++){
-            int holeStart = firstValid;
-            int holeEnd = firstValid;
-            if(road[i] == NaN){
+            int holeStart,holeEnd;
+            if(isNaN(road[i])){
                 holeStart = i - 1;
                 holeEnd = i;
-                while(road[holeEnd] == NaN){
+                while(isNaN(road[holeEnd])){
                     holeEnd++;
                 }
-                double respectiveDistance = (holeEnd - holeStart)/(holeEnd - holeStart - 1)*maxStepLength;
                 for (int j = 1; j < holeEnd - holeStart - 1; j++) {
-                    road[j + holeStart] = (float) Math2.interpolate(road[holeStart - 1], road[holeEnd], respectiveDistance * j);
+                    road[j + holeStart] = (float) Math2.interpolate(road[holeStart - 1], road[holeEnd], maxStepLength * j);
                 }
             }
         }

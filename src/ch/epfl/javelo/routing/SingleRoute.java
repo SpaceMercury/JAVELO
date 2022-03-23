@@ -110,6 +110,6 @@ public final class SingleRoute implements Route{
      */
     @Override
     public RoutePoint pointClosestTo(PointCh point) {
-
+        return null;
     }
 }
