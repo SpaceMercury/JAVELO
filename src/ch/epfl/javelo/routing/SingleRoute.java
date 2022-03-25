@@ -83,14 +83,7 @@ public final class SingleRoute implements Route{
      * @return the point at the given position of the itinerary
      */
     @Override
-    //TODO: Ask what to do if position is bigger than the segment length.
     public PointCh pointAt(double position) {
-//        int edgeNumber = 0;
-//        while(position - edges.get(edgeNumber).length() >= 0){
-//            position -= edges.get(edgeNumber).length();
-//            edgeNumber++;
-//        }
-//        return edges.get(edgeNumber).pointAt(position);
 
         double[] lengthList= new double[edges.size()+1];
         int edge = 0;
@@ -109,8 +102,10 @@ public final class SingleRoute implements Route{
         if(Math.abs(searchAlg)-2 >= edges.size()){
             return edges.get(edges.size()-1).toPoint();
         }
-        if(searchAlg < 0) {
-            edge = Math.abs(searchAlg) - 2;
+        if(searchAlg <= 0) {
+            if(searchAlg <= -2) {
+                edge = Math.abs(searchAlg) - 2;
+            }
            return edges.get(edge).pointAt(position - lengthList[edge]);
         }
         else{
@@ -169,8 +164,11 @@ public final class SingleRoute implements Route{
         if(searchAlg == -1){
             return 0;
         }
-        if (searchAlg >= 0){
-            return searchAlg;
+        if (searchAlg == 0){
+            return edges.get(searchAlg).toNodeId();
+        }
+        if (searchAlg > 0){
+            return edges.get(searchAlg-1).toNodeId();
         }
         if(Math.abs(searchAlg) >= edges.size()){
             return edges.get(edges.size()-1).toNodeId();
@@ -197,14 +195,34 @@ public final class SingleRoute implements Route{
     @Override
     public RoutePoint pointClosestTo(PointCh point) {
 
-        PointCh closestPoint = edges.get(0).toPoint();
-        double closestDistance = point.distanceTo(closestPoint);
-        for (int i=0; i < edges.size()-1; ++i) {
-            if (edges.get(i).positionClosestTo(point) < closestDistance){
+        PointCh closestPoint = null;
+        double closestDistance = Double.POSITIVE_INFINITY;
+        double finalPosition = 0;
+        double distance2 = 0;
+
+        distance2 = edges.get(0).fromPoint().distanceTo(point);
+        closestDistance = distance2;
+        closestPoint = edges.get(0).fromPoint();
+        finalPosition = edges.get(0).length();
+
+        double[] lengthList= new double[edges.size()+1];
+        double totalLength = 0;
+        lengthList[0] = totalLength;
+
+        for (int i = 1; i <= edges.size(); ++i ){
+            totalLength = totalLength + edges.get(i-1).length();
+            lengthList[i] = (totalLength);
+        }
+
+        for (int i=0; i < edges.size(); ++i) {
+            distance2 = edges.get(i).toPoint().distanceTo(point);
+            if(distance2 < closestDistance){
+                closestDistance = distance2;
                 closestPoint = edges.get(i).toPoint();
-                closestDistance = point.distanceTo(closestPoint);
+                finalPosition = lengthList[i] + edges.get(i).length();
             }
         }
-        return new RoutePoint(closestPoint, closestDistance, closestPoint.distanceTo(point) );
+        return new RoutePoint(closestPoint,finalPosition,closestDistance );
+
     }
 }
