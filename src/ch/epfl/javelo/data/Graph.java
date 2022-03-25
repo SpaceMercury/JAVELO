@@ -19,13 +19,11 @@ import java.util.function.DoubleUnaryOperator;
  * @author vince
  */
 
-public final class Graph {
-
-
-    private GraphNodes nodes;
-    private GraphSectors sectors;
-    private GraphEdges edges;
-    private List<AttributeSet> attributeSets;
+public class Graph {
+    private final GraphNodes nodes;
+    private final GraphSectors sectors;
+    private final GraphEdges edges;
+    private final List<AttributeSet> attributeSets;
 
     /**
      * Constructor of the graph class
@@ -35,11 +33,10 @@ public final class Graph {
      * @param attributeSets
      */
     public Graph(GraphNodes nodes, GraphSectors sectors, GraphEdges edges, List<AttributeSet> attributeSets){
-
         this.nodes = nodes;
         this.sectors = sectors;
         this.edges = edges;
-        this.attributeSets = attributeSets;
+        this.attributeSets = List.copyOf(attributeSets);
     }
 
 
@@ -85,7 +82,7 @@ public final class Graph {
         try(FileChannel channel = FileChannel.open(attributePath)){
             attributeBuffer = channel.map(FileChannel.MapMode.READ_ONLY,0, channel.size()).asLongBuffer();
         }
-        ArrayList<AttributeSet> attributeSet = new ArrayList<>();
+        List<AttributeSet> attributeSet = new ArrayList<>();
         for (int i = 0; i < attributeBuffer.capacity(); i++) {
             attributeSet.add(new AttributeSet(attributeBuffer.get(i)));
         }
@@ -136,7 +133,7 @@ public final class Graph {
      * @return
      */
     public int nodeClosestTo(PointCh point, double searchDistance){
-        ArrayList<GraphSectors.Sector> inArea = sectors.sectorsInArea(point, searchDistance);
+        List<GraphSectors.Sector> inArea = sectors.sectorsInArea(point, searchDistance);
         int closestNodeId = -1;
         double minDistance = Math.pow(searchDistance,2);
         for(GraphSectors.Sector sect : inArea){

@@ -30,9 +30,9 @@ public record GraphSectors(ByteBuffer buffer) {
      * @param distance Half of the length of the square, or max linear distance between point and sector
      * @return A list of sectors that are contained within the square
      */
-    public ArrayList<Sector> sectorsInArea(PointCh center, double distance) {
+    public List<Sector> sectorsInArea(PointCh center, double distance) {
 
-        ArrayList<Sector> containedList = new ArrayList<>();
+        List<Sector> containedList = new ArrayList<>();
         double negativeE = center.e() - distance - MIN_E;
         double positiveE = center.e() + distance - MIN_E;
         double negativeN = center.n() - distance - MIN_N;
