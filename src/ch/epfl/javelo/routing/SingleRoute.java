@@ -38,6 +38,12 @@ public final class SingleRoute implements Route{
             }
             segmentStart = segmentEnd;
         }*/
+
+        for (int i = 0; i < edges.size() - 1 ; i++) {
+            if( position >= edges.get(1).length() && position <= edges.get(i+1).length()){
+                return i;
+            }
+        }
         return 0;
     }
 
@@ -54,7 +60,7 @@ public final class SingleRoute implements Route{
     }
 
     /**
-     *
+     * Getter for the edges of the list
      * @return all the edges of the itinerary
      */
     @Override
@@ -92,10 +98,14 @@ public final class SingleRoute implements Route{
 //        }
 //        return edges.get(edgeNumber).pointAt(position);
 
-        double[] lengthList= new double[edges.size()-1];
+        double[] lengthList= new double[edges.size()+1];
         int edge = 0;
-        for (int i = 1; i < edges.size(); ++i ){
-            lengthList[i] = (edges.get(i).length() + edges.get(i-1).length());
+        double totalLength = 0;
+        lengthList[0] = totalLength;
+
+        for (int i = 1; i <= edges.size(); ++i ){
+            totalLength = totalLength + edges.get(i-1).length();
+            lengthList[i] = (totalLength);
         }
         int searchAlg = Arrays.binarySearch(lengthList, position);
 
@@ -116,10 +126,14 @@ public final class SingleRoute implements Route{
     @Override
     public double elevationAt(double position) {
 
-        double[] lengthList= new double[edges.size()-1];
+        double[] lengthList= new double[edges.size()+1];
         int edge = 0;
-        for (int i = 1; i < edges.size(); ++i ) {
-            lengthList[i] = (edges.get(i).length() + edges.get(i - 1).length());
+        double totalLength = 0;
+        lengthList[0] = totalLength;
+
+        for (int i = 1; i <= edges.size(); ++i ){
+            totalLength = totalLength + edges.get(i-1).length();
+            lengthList[i] = (totalLength);
         }
         int searchAlg = Arrays.binarySearch(lengthList, position);
         if(searchAlg <= 0) {
@@ -139,9 +153,13 @@ public final class SingleRoute implements Route{
     @Override
     public int nodeClosestTo(double position) {
 
-        double[] lengthList= new double[edges.size()-1];
-        for (int i = 1; i < edges.size(); ++i ){
-            lengthList[i] = (edges.get(i).length() + edges.get(i-1).length());
+        double[] lengthList= new double[edges.size()+1];
+        double totalLength = 0;
+        lengthList[0] = totalLength;
+
+        for (int i = 1; i <= edges.size(); ++i ){
+            totalLength = totalLength + edges.get(i-1).length();
+            lengthList[i] = (totalLength);
         }
         int searchAlg = Arrays.binarySearch(lengthList, position);
         if (searchAlg >= 0){
@@ -152,7 +170,7 @@ public final class SingleRoute implements Route{
             double node1 = lengthList[Math.abs(searchAlg)-2];
             double node2 = lengthList[Math.abs(searchAlg)-1];
 
-             if ((node1+node2)/2 + node1 >= position){
+             if ((node1+node2)/2 >= position){
                  return Math.abs(searchAlg)-2;
              }
              else{
