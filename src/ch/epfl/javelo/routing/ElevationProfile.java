@@ -23,7 +23,7 @@ public final class ElevationProfile {
      */
     public ElevationProfile(double length, float[] elevationSamples) {
 
-        Preconditions.checkArgument(length > 0 && elevationSamples.length >2);
+        Preconditions.checkArgument(length > 0 && elevationSamples.length >=2);
         this.length = length;
         this.elevationSamples = elevationSamples;
 
