@@ -258,6 +258,11 @@ class GraphTest {
     }
 
     @Test
+    void graphAttributesWorks() {
+
+    }
+
+    @Test
     void graphConstructorCopiesAttributesListToEnsureImmutability() {
         var nodesCount = 10;
         var nodesBuffer = IntBuffer.allocate(3 * nodesCount);
