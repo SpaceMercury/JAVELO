@@ -109,12 +109,12 @@ public final class SingleRoute implements Route{
         if(Math.abs(searchAlg)-2 >= edges.size()){
             return edges.get(edges.size()-1).toPoint();
         }
-        if(searchAlg <= 0) {
+        if(searchAlg < 0) {
             edge = Math.abs(searchAlg) - 2;
            return edges.get(edge).pointAt(position - lengthList[edge]);
         }
         else{
-           return edges.get(searchAlg-1).pointAt(edges.get(searchAlg-1).length() );
+           return edges.get(searchAlg-1).pointAt(edges.get(searchAlg-1).length());
         }
     }
 
@@ -136,9 +136,12 @@ public final class SingleRoute implements Route{
             lengthList[i] = (totalLength);
         }
         int searchAlg = Arrays.binarySearch(lengthList, position);
-        if(searchAlg <= 0) {
+        if(searchAlg < 0) {
             edge = Math.abs(searchAlg) - 2;
-            return edges.get(edge).elevationAt(position);
+            return edges.get(edge).elevationAt(position - lengthList[edge]);
+        }
+        if(searchAlg >= edges.size()){
+            return edges.get(edges.size()-1).elevationAt(edges.get(edges.size()-1).length());
         }
         else{
             return edges.get(searchAlg).elevationAt(0);
@@ -162,6 +165,10 @@ public final class SingleRoute implements Route{
             lengthList[i] = (totalLength);
         }
         int searchAlg = Arrays.binarySearch(lengthList, position);
+
+        if(searchAlg == -1){
+            return 0;
+        }
         if (searchAlg >= 0){
             return searchAlg;
         }
@@ -170,11 +177,11 @@ public final class SingleRoute implements Route{
             double node1 = lengthList[Math.abs(searchAlg)-2];
             double node2 = lengthList[Math.abs(searchAlg)-1];
 
-             if ((node1+node2)/2 >= position){
-                 return Math.abs(searchAlg)-2;
+             if (Math.abs(node1-position) <= Math.abs(node2-position)){
+                 return (int)node1;
              }
              else{
-                 return Math.abs(searchAlg)-1;
+                 return (int)node2;
              }
         }
     }
