@@ -1,15 +1,12 @@
 package ch.epfl.javelo.routing;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.DoubleSummaryStatistics;
 import java.util.random.RandomGenerator;
 
-import static ch.epfl.test.TestRandomizer.RANDOM_ITERATIONS;
-import static ch.epfl.test.TestRandomizer.newRandom;
+import static ch.epfl.javelo.TestRandomizer.RANDOM_ITERATIONS;
+import static ch.epfl.javelo.TestRandomizer.newRandom;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

@@ -83,15 +83,7 @@ public final class SingleRoute implements Route{
      * @return the point at the given position of the itinerary
      */
     @Override
-    //TODO: Ask what to do if position is bigger than the segment length.
     public PointCh pointAt(double position) {
-//        int edgeNumber = 0;
-//        while(position - edges.get(edgeNumber).length() >= 0){
-//            position -= edges.get(edgeNumber).length();
-//            edgeNumber++;
-//        }
-//        return edges.get(edgeNumber).pointAt(position);
-
         double[] lengthList= new double[edges.size()+1];
         int edge = 0;
         double totalLength = 0;
@@ -126,7 +118,7 @@ public final class SingleRoute implements Route{
     @Override
     public double elevationAt(double position) {
 
-        double[] lengthList= new double[edges.size()+1];
+        double[] lengthList = new double[edges.size() + 1];
         int edge = 0;
         double totalLength = 0;
         lengthList[0] = totalLength;
@@ -196,7 +188,6 @@ public final class SingleRoute implements Route{
      */
     @Override
     public RoutePoint pointClosestTo(PointCh point) {
-
         PointCh closestPoint = edges.get(0).toPoint();
         double closestDistance = point.distanceTo(closestPoint);
         for (int i=0; i < edges.size()-1; ++i) {
