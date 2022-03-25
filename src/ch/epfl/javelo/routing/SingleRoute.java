@@ -172,16 +172,19 @@ public final class SingleRoute implements Route{
         if (searchAlg >= 0){
             return searchAlg;
         }
+        if(Math.abs(searchAlg) >= edges.size()){
+            return edges.get(edges.size()-1).toNodeId();
+        }
         // Find which node the position is closest to
         else{
             double node1 = lengthList[Math.abs(searchAlg)-2];
             double node2 = lengthList[Math.abs(searchAlg)-1];
 
              if (Math.abs(node1-position) <= Math.abs(node2-position)){
-                 return (int)node1;
+                 return edges.get((int)node1).fromNodeId();
              }
              else{
-                 return (int)node2;
+                 return edges.get((int)node1).toNodeId();
              }
         }
     }
