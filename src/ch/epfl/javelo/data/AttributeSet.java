@@ -59,8 +59,8 @@ public record AttributeSet(long bits) {
     }
 
     /**
-     * @TODO vince can you comment this?
-     * @return
+     *
+     * @return all of the attributes in a string list
      */
     @Override
     public String toString(){

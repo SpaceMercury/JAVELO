@@ -18,7 +18,7 @@ public final class ElevationProfileComputer {
     /**
      * Takes a road, and returns a filled ElevationProfile of it
      * @param route Road of which the elevationProfile shall be analysed
-     * @param maxStepLength distance between each point on the road.
+     * @param stepLength distance between each point on the road.
      * @return ElevationProfile of the road
      */
     public static ElevationProfile elevationProfile(Route route, double maxStepLength){
@@ -26,14 +26,16 @@ public final class ElevationProfileComputer {
 
         int sampleNumber = ((int) Math.ceil(route.length()/maxStepLength)) + 1;
         float[] road = new float[sampleNumber];
+        double stepLength = route.length()/(sampleNumber - 1);
         for(int i = 0; i < sampleNumber; i++){
-            road[i] = (float) route.elevationAt(maxStepLength*i);
+            road[i] = (float) route.elevationAt(stepLength*i);
         }
 
         int firstValid = 0;
         while(isNaN(road[firstValid]) && firstValid < sampleNumber - 1){
             firstValid++;
         }
+
         if(firstValid < sampleNumber - 1) {
             Arrays.fill(road, 0, firstValid, road[firstValid]);
         } else{
@@ -60,8 +62,8 @@ public final class ElevationProfileComputer {
                 while(isNaN(road[holeEnd])){
                     holeEnd++;
                 }
-                for (int j = 1; j < holeEnd - holeStart - 1; j++) {
-                    road[j + holeStart] = (float) Math2.interpolate(road[holeStart - 1], road[holeEnd], maxStepLength * j);
+                for (int j = 1; j < holeEnd - holeStart; j++) {
+                    road[j + holeStart] = (float) Math2.interpolate(road[((holeStart - 1) < 0)? 0: holeStart - 1], road[holeEnd], stepLength * j);
                 }
             }
         }
