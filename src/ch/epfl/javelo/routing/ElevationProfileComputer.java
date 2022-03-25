@@ -47,13 +47,6 @@ public final class ElevationProfileComputer {
         }
         Arrays.fill(road, lastValid + 1, sampleNumber, road[lastValid]);
 
-        /**
-         * Given that we fill the start and the end of the table before this step, in every
-         * possible case, any holes will be contained after the first valid number,
-         * and before the last valid number, so we can save possibly quite some time by running
-         * the following checks only on the interval [firstValid, lastValid], as we know before and after
-         * are no holes.
-         */
         for(int i = firstValid; i <= lastValid; i++){
             int holeStart,holeEnd;
             if(isNaN(road[i])){
