@@ -187,12 +187,12 @@ public final class SingleRoute implements Route{
     @Override
     public RoutePoint pointClosestTo(PointCh point) {
 
-        PointCh closestPoint = null;
-        double closestDistance = 0.;
+        PointCh closestPoint = edges.get(0).toPoint();
+        double closestDistance = point.distanceTo(closestPoint);
         for (int i=0; i < edges.size()-1; ++i) {
-            closestDistance = edges.get(i).positionClosestTo(point);
-            if (edges.get(i+1).positionClosestTo(point) < edges.get(i).positionClosestTo(point)){
-                closestPoint = edges.get(i+1).pointAt(closestDistance);
+            if (edges.get(i).positionClosestTo(point) < closestDistance){
+                closestPoint = edges.get(i).toPoint();
+                closestDistance = point.distanceTo(closestPoint);
             }
         }
         return new RoutePoint(closestPoint, closestDistance, closestPoint.distanceTo(point) );

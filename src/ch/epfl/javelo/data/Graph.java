@@ -172,7 +172,7 @@ public class Graph {
      * @return
      */
     public AttributeSet edgeAttributes(int edgeId){
-        return new AttributeSet(edges.attributesIndex(edgeId));
+        return attributeSets.get(this.edges.attributesIndex(edgeId));
     }
 
     /**
