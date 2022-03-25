@@ -17,6 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class EdgeTest {
     private static final double DELTA = 1e-7;
 
+//    var fPH = new PointCh(e1, n1);
+//    var tPH = new PointCh(e2, n1);
+//    var edgeLength = e2 - e1;
+//    var edge = new Edge(0, 1, fPH, tPH, edgeLength, d -> 100);
 
     @Test
     void edgeOfWorksOnLausanneData() throws IOException {
@@ -142,12 +146,21 @@ class EdgeTest {
             assertTrue(Double.isNaN(edge.elevationAt(x)));
     }
 
-    @Test
-    void edgeElevationAtWorksWithWavyProfile() {
-        var fP = new PointCh(2_600_000, 1_200_000);
-        var tP = new PointCh(2_600_001, 1_200_001);
-        var edge = new Edge(0, 1, fP, tP, Math.sqrt(2), Math::sin);
-        for (double x = -20; x <= 20; x += 1)
-            assertEquals(Math.sin(x), edge.elevationAt(x));
-    }
+//    @Test
+//    void edgeElevationAtWorksWithWavyProfile() {
+//        var fP = new PointCh(2_600_000, 1_200_000);
+//        var tP = new PointCh(2_600_001, 1_200_001);
+//        var edge = new Edge(0, 1, fP, tP, Math.sqrt(2), Math::sin);
+//        for (double x = -20; x <= 20; x += 1)
+//            assertEquals(Math.sin(x), edge.elevationAt(x));
+//    }
+//
+//    @Test
+//    void edgeElevationAtWorksWithWavyProfile() {
+//        var fP = new PointCh(2_600_000, 1_200_000);
+//        var tP = new PointCh(2_600_001, 1_200_001);
+//        var edge = new Edge(0, 1, fP, tP, Math.sqrt(2), Math::sin);
+//        for (double x = -20; x <= 20; x += 1)
+//            assertEquals(Math.sin(x), edge.elevationAt(x));
+//    }
 }
