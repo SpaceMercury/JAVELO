@@ -1,5 +1,6 @@
 package ch.epfl.javelo.routing;
 
+import ch.epfl.javelo.Math2;
 import ch.epfl.javelo.Preconditions;
 import ch.epfl.javelo.projection.PointCh;
 
@@ -195,16 +196,6 @@ public final class SingleRoute implements Route{
     @Override
     public RoutePoint pointClosestTo(PointCh point) {
 
-        PointCh closestPoint = null;
-        double closestDistance = Double.POSITIVE_INFINITY;
-        double finalPosition = 0;
-        double distance2 = 0;
-
-        distance2 = edges.get(0).fromPoint().distanceTo(point);
-        closestDistance = distance2;
-        closestPoint = edges.get(0).fromPoint();
-        finalPosition = edges.get(0).length();
-
         double[] lengthList= new double[edges.size()+1];
         double totalLength = 0;
         lengthList[0] = totalLength;
@@ -214,15 +205,22 @@ public final class SingleRoute implements Route{
             lengthList[i] = (totalLength);
         }
 
-        for (int i=0; i < edges.size(); ++i) {
-            distance2 = edges.get(i).toPoint().distanceTo(point);
-            if(distance2 < closestDistance){
-                closestDistance = distance2;
-                closestPoint = edges.get(i).toPoint();
-                finalPosition = lengthList[i] + edges.get(i).length();
-            }
+        double smallestDistance = Double.POSITIVE_INFINITY;
+        RoutePoint smallestPoint = RoutePoint.NONE;
+        Edge smallEdge = null;
+        double position;
+        double edgepos;
+
+        List<PointCh> closePointList= new ArrayList<>();
+
+        for (Edge edge : edges) {
+            position = Math2.clamp(0, edge.positionClosestTo(point), edge.length());
+            edgepos = position + lengthList[edges.indexOf(edge)];
+            smallestPoint = smallestPoint.min(edge.pointAt(position), edgepos, point.distanceTo(edge.pointAt(position)));
         }
-        return new RoutePoint(closestPoint,finalPosition,closestDistance );
+
+        return smallestPoint;
+
 
     }
 }
