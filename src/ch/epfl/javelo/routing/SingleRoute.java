@@ -30,19 +30,13 @@ public final class SingleRoute implements Route{
      */
     @Override
     public int indexOfSegmentAt(double position) {
-        /**double segmentStart = 0, segmentEnd = 0;
-        for (int i = 0; i < edges.size() - 1 ; i++) {
+        double segmentStart = 0, segmentEnd = 0;
+        for (int i = 0; i < edges.size() ; i++) {
             segmentEnd += edges.get(i).length();
             if(position >= segmentStart && position <= segmentEnd && i >= 1){
-                return i - 1;
-            }
-            segmentStart = segmentEnd;
-        }*/
-
-        for (int i = 0; i < edges.size() - 1 ; i++) {
-            if( position >= edges.get(1).length() && position <= edges.get(i+1).length()){
                 return i;
             }
+            segmentStart = segmentEnd;
         }
         return 0;
     }
@@ -109,12 +103,18 @@ public final class SingleRoute implements Route{
         }
         int searchAlg = Arrays.binarySearch(lengthList, position);
 
+        if(searchAlg == -1){
+            return edges.get(0).fromPoint();
+        }
+        if(Math.abs(searchAlg)-2 >= edges.size()){
+            return edges.get(edges.size()-1).toPoint();
+        }
         if(searchAlg <= 0) {
             edge = Math.abs(searchAlg) - 2;
-           return edges.get(edge).pointAt(position);
+           return edges.get(edge).pointAt(position - lengthList[edge]);
         }
         else{
-           return edges.get(searchAlg).pointAt(position);
+           return edges.get(searchAlg-1).pointAt(edges.get(searchAlg-1).length() );
         }
     }
 
