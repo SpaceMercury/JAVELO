@@ -133,8 +133,8 @@ public final class SingleRoute implements Route{
 
     /**
      *
-     * @param position
-     * @return
+     * @param position the desired position
+     * @return the index of the node that is closest to that position
      */
     @Override
     public int nodeClosestTo(double position) {
