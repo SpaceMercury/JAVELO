@@ -132,8 +132,13 @@ public final class SingleRoute implements Route{
             lengthList[i] = (totalLength);
         }
         int searchAlg = Arrays.binarySearch(lengthList, position);
+        if(searchAlg == -1){
+            return edges.get(0).elevationAt(0);
+        }
         if(searchAlg < 0) {
-            edge = Math.abs(searchAlg) - 2;
+            if(searchAlg <= -2) {
+                edge = Math.abs(searchAlg) - 2;
+            }
             return edges.get(edge).elevationAt(position - lengthList[edge]);
         }
         if(searchAlg >= edges.size()){
@@ -204,22 +209,19 @@ public final class SingleRoute implements Route{
             totalLength = totalLength + edges.get(i-1).length();
             lengthList[i] = (totalLength);
         }
+        RoutePoint smallestRoutePoint = RoutePoint.NONE;
 
-        double smallestDistance = Double.POSITIVE_INFINITY;
-        RoutePoint smallestPoint = RoutePoint.NONE;
-        Edge smallEdge = null;
         double position;
         double edgepos;
 
-        List<PointCh> closePointList= new ArrayList<>();
 
         for (Edge edge : edges) {
             position = Math2.clamp(0, edge.positionClosestTo(point), edge.length());
             edgepos = position + lengthList[edges.indexOf(edge)];
-            smallestPoint = smallestPoint.min(edge.pointAt(position), edgepos, point.distanceTo(edge.pointAt(position)));
+            smallestRoutePoint = smallestRoutePoint.min(edge.pointAt(position), edgepos, point.distanceTo(edge.pointAt(position)));
         }
 
-        return smallestPoint;
+        return smallestRoutePoint;
 
 
     }
