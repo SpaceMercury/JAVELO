@@ -8,8 +8,8 @@ import java.nio.ShortBuffer;
 import java.util.Arrays;
 import java.util.List;
 
-import static ch.epfl.javelo.TestRandomizer.RANDOM_ITERATIONS;
-import static ch.epfl.javelo.TestRandomizer.newRandom;
+import static ch.epfl.test.TestRandomizer.RANDOM_ITERATIONS;
+import static ch.epfl.test.TestRandomizer.newRandom;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GraphEdgesTest {

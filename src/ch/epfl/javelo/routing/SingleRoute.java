@@ -20,7 +20,7 @@ public final class SingleRoute implements Route{
     public SingleRoute(List<Edge> edges){
 
         Preconditions.checkArgument(edges.size() > 0);
-        this.edges = edges;
+        this.edges = List.copyOf(edges);
 
     }
 
@@ -31,14 +31,14 @@ public final class SingleRoute implements Route{
      */
     @Override
     public int indexOfSegmentAt(double position) {
-        double segmentStart = 0, segmentEnd = 0;
+        /**double segmentStart = 0, segmentEnd = 0;
         for (int i = 0; i < edges.size() ; i++) {
             segmentEnd += edges.get(i).length();
             if(position >= segmentStart && position <= segmentEnd && i >= 1){
                 return i;
             }
             segmentStart = segmentEnd;
-        }
+        }*/
         return 0;
     }
 

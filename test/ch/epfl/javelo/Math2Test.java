@@ -1,9 +1,10 @@
 package ch.epfl.javelo;
 
+import ch.epfl.test.TestRandomizer;
 import org.junit.jupiter.api.Test;
 
-import static ch.epfl.javelo.TestRandomizer.RANDOM_ITERATIONS;
-import static ch.epfl.javelo.TestRandomizer.newRandom;
+import static ch.epfl.test.TestRandomizer.RANDOM_ITERATIONS;
+import static ch.epfl.test.TestRandomizer.newRandom;
 import static org.junit.jupiter.api.Assertions.*;
 
 class Math2Test {

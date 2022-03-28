@@ -58,7 +58,6 @@ public final class ElevationProfileComputer {
                 for (int j = 1; j <= holeEnd - holeStart; j++) {
                     road[j + holeStart] = (float) Math2.interpolate(road[holeStart], road[holeEnd],  j/ (double)(holeEnd - holeStart));
                 }
-                i = holeEnd;
             }
         }
         return new ElevationProfile(route.length(), road);
