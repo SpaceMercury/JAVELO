@@ -67,9 +67,6 @@ public final class RouteComputer {
         }
 
 
-       // edgeList.add(Edge.of(graph, graph.nodeOutDegree(predecesor[endNodeId]), predecesor[endNodeId], endNodeId));
-
-        List<Route> routeList= new ArrayList<>();
         List<Integer> reverseList = new ArrayList<>();
 
         reverseList.add(endNodeId);
@@ -82,18 +79,18 @@ public final class RouteComputer {
            reverseList.add(P);
        }
 
-        for (int i = reverseList.size()-1; i > 0 ; i--) {
+        for (int i = 0; i < reverseList.size()-1 ; i++) {
 
-            int nodeNum = graph.nodeOutDegree(reverseList.get(i-1));
+            int nodeNum = graph.nodeOutDegree(reverseList.get(i+1));
 
             int edgeId = 0;
             for (int j = 0; j < nodeNum ; j++) {
 
-                if(graph.edgeTargetNodeId(graph.nodeOutEdgeId(reverseList.get(i-1),j)) == reverseList.get(i)){
-                   edgeId = graph.nodeOutEdgeId(reverseList.get(i-1),j);
+                if(graph.edgeTargetNodeId(graph.nodeOutEdgeId(reverseList.get(i+1),j)) == reverseList.get(i)){
+                   edgeId = graph.nodeOutEdgeId(reverseList.get(i+1),j);
                }
             }
-            edgeList.add(Edge.of(graph, edgeId, reverseList.get(i-1), reverseList.get(i)));
+            edgeList.add(Edge.of(graph, edgeId, reverseList.get(i+1), reverseList.get(i)));
         }
 
 
