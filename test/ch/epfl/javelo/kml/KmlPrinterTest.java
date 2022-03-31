@@ -1,6 +1,8 @@
 package ch.epfl.javelo.kml;
 
 import ch.epfl.javelo.data.Graph;
+import ch.epfl.javelo.routing.CityBikeCF;
+import ch.epfl.javelo.routing.CostFunction;
 import ch.epfl.javelo.routing.Route;
 import ch.epfl.javelo.routing.RouteComputer;
 
