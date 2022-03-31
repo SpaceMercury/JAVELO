@@ -3,16 +3,24 @@ package ch.epfl.javelo.routing;
 import ch.epfl.javelo.Math2;
 import ch.epfl.javelo.projection.PointCh;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.Arrays.binarySearch;
 
 public final class MultiRoute implements Route{
     private final List<Route> segments;
+    private final double[] segmentLengths;
     public MultiRoute(List<Route> segments){
-        this.segments = segments;
+        this.segments = List.copyOf(segments);
+        this.segmentLengths = new double[segments.size() + 1];
+        for(int i = 0; i < segments.size(); i++){
+            segmentLengths[i + 1] = segments.get(i).length();
+        }
     }
     private double positionCorrection(double position){
         double length = 0;
-        for (int i = 0; i < segments.size(); i++) {
+        for (int i = 0; i < segments.size(); i++) { //check if it is < or <=
             length += segments.get(i).length();
         }
         return Math2.clamp(0, position, length);
@@ -25,12 +33,12 @@ public final class MultiRoute implements Route{
     public int indexOfSegmentAt(double position) {
         position = positionCorrection(position);
         double segmentStart = 0, segmentEnd = 0;
-         for (int i = 0; i < segments.size() ; i++) {
-         segmentEnd += segments.get(i).length();
-         if(position >= segmentStart && position <= segmentEnd){
-         return i;
-         }
-         segmentStart = segmentEnd;
+        for (int i = 0; i < segments.size() ; i++) {
+            segmentEnd += segments.get(i).length();
+            if(position >= segmentStart && position <= segmentEnd){
+            return i;
+            }
+            segmentStart = segmentEnd;
          }
          return segments.size() - 1;
     }
@@ -40,7 +48,11 @@ public final class MultiRoute implements Route{
      */
     @Override
     public double length() {
-        return 0;
+        double length = 0;
+        for(int i = 0; i < segments.size(); i++){
+            length += segments.get(i).length();
+        }
+        return length;
     }
 
     /**
@@ -48,7 +60,11 @@ public final class MultiRoute implements Route{
      */
     @Override
     public List<Edge> edges() {
-        return null;
+        List<Edge> edges = new ArrayList<>();
+        for (int i = 0; i < segments.size(); i++) {
+            edges.addAll(segments.get(i).edges());
+        }
+        return edges;
     }
 
     /**
@@ -56,7 +72,11 @@ public final class MultiRoute implements Route{
      */
     @Override
     public List<PointCh> points() {
-        return null;
+        List<PointCh> pointCH = new ArrayList<>();
+        for (int i = 0; i < segments.size(); i++) {
+            pointCH.addAll(segments.get(i).points());
+        }
+        return pointCH;
     }
 
     /**
@@ -66,7 +86,8 @@ public final class MultiRoute implements Route{
     @Override
     public PointCh pointAt(double position) {
         position = positionCorrection(position);
-        return null;
+        int id = binaryIdResearch(position);
+        return segments.get(id).pointAt(position - segments.get(id).length());
     }
 
     /**
@@ -76,7 +97,8 @@ public final class MultiRoute implements Route{
     @Override
     public double elevationAt(double position) {
         position = positionCorrection(position);
-        return 0;
+        int id = binaryIdResearch(position);
+        return segments.get(id).elevationAt(position - segments.get(id).length());
     }
 
     /**
@@ -86,7 +108,8 @@ public final class MultiRoute implements Route{
     @Override
     public int nodeClosestTo(double position) {
         position = positionCorrection(position);
-        return 0;
+        int id = binaryIdResearch(position);
+        return segments.get(id).nodeClosestTo(position - segments.get(id).length());
     }
 
     /**
@@ -95,6 +118,22 @@ public final class MultiRoute implements Route{
      */
     @Override
     public RoutePoint pointClosestTo(PointCh point) {
-        return null;
+        RoutePoint closestPoint = RoutePoint.NONE;
+        for (int i = 0; i < segments.size(); i++) {
+            closestPoint = closestPoint.min(segments.get(i).pointClosestTo(point));
+        }
+        return closestPoint;
     }
+
+    private int binaryIdResearch(double position){
+        int id = binarySearch(segmentLengths, position);
+        if(id < 0){
+            id = -(id + 2);
+        }
+        if(id == segmentLengths.length - 1){
+            id--;
+        }
+        return id;
+    }
+
 }
