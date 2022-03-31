@@ -56,7 +56,7 @@ public final class RouteComputer {
             for (int i = 0; i < graph.nodeOutDegree(N); i++) {
                 edgeID = graph.nodeOutEdgeId(N, i);
                 nPrime = graph.edgeTargetNodeId(edgeID);
-                d = distance[N] +  (float)graph.edgeLength(edgeID);
+                d = distance[N] +  (float)costFunction.costFactor(N, edgeID)*(float)graph.edgeLength(edgeID);
 
                 if( d < distance[nPrime] ){
                     distance[nPrime] = d;
@@ -82,20 +82,23 @@ public final class RouteComputer {
            reverseList.add(P);
        }
 
-        for (int i = reverseList.size(); i > 0 ; i--) {
+        for (int i = reverseList.size()-1; i > 0 ; i--) {
 
-            int nodeNum = graph.nodeOutDegree(i-1);
+            int nodeNum = graph.nodeOutDegree(reverseList.get(i-1));
+
+            int edgeId = 0;
             for (int j = 0; j < nodeNum ; j++) {
-                edgeList.add(Edge.of(graph, graph.nodeOutEdgeId(i-1,j), i, i-1));
-            }
-            routeList.add(new SingleRoute(edgeList));
-            edgeList.clear();
 
+                if(graph.edgeTargetNodeId(graph.nodeOutEdgeId(reverseList.get(i-1),j)) == reverseList.get(i)){
+                   edgeId = graph.nodeOutEdgeId(reverseList.get(i-1),j);
+               }
+            }
+            edgeList.add(Edge.of(graph, edgeId, reverseList.get(i-1), reverseList.get(i)));
         }
 
 
 
-        return SingleRoute;
+        return new SingleRoute(edgeList);
     }
 
 
