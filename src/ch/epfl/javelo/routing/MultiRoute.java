@@ -32,6 +32,7 @@ public final class MultiRoute implements Route{
          }
          segmentStart = segmentEnd;
          }
+         return segments.size() - 1;
     }
 
     /**
