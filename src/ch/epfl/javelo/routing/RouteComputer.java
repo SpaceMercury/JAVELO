@@ -17,7 +17,7 @@ public final class RouteComputer {
     }
 
 
-    Route bestRouteBetween(int startNodeId, int endNodeId){
+    public Route bestRouteBetween(int startNodeId, int endNodeId){
 
         Preconditions.checkArgument(startNodeId != endNodeId);
         List<Integer> exploring = new ArrayList<>();
@@ -65,7 +65,7 @@ public final class RouteComputer {
 
 
         do{
-            edgeList.add( Edge.of(graph, graph. , predecesor[endNodeId], endNodeId);
+            edgeList.add( Edge.of(graph, graph. , predecesor[endNodeId], endNodeId));
 
         }while ();
 
