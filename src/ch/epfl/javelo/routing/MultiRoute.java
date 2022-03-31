@@ -4,7 +4,6 @@ import ch.epfl.javelo.Math2;
 import ch.epfl.javelo.projection.PointCh;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Arrays.binarySearch;
@@ -132,7 +131,7 @@ public final class MultiRoute implements Route{
             id = -(id + 2);
         }
         if(id == segmentLengths.length - 1){
-            id-;
+            id--;
         }
         return id;
     }
