@@ -131,6 +131,11 @@ public final class SingleRoute implements Route{
             totalLength = totalLength + edges.get(i-1).length();
             lengthList[i] = (totalLength);
         }
+        if(position > lengthList[edges.size()]){
+            Edge lastEdge = edges.get(edges.size()-1);
+            return lastEdge.elevationAt(lastEdge.length());
+        }
+
         int searchAlg = Arrays.binarySearch(lengthList, position);
         if(searchAlg == -1){
             return edges.get(0).elevationAt(0);
@@ -147,6 +152,7 @@ public final class SingleRoute implements Route{
         else{
             return edges.get(searchAlg).elevationAt(0);
         }
+
     }
 
     /**
@@ -170,25 +176,26 @@ public final class SingleRoute implements Route{
         if(searchAlg == -1){
             return 0;
         }
-        if (searchAlg == 0){
-            return edges.get(searchAlg).toNodeId();
-        }
-        if (searchAlg > 0){
-            return edges.get(searchAlg-1).toNodeId();
-        }
-        if(Math.abs(searchAlg) >= edges.size()){
+        if(Math.abs(searchAlg) >= edges.size()+2){
             return edges.get(edges.size()-1).toNodeId();
         }
+        if (searchAlg == edges.size()){
+            return edges.get(searchAlg-1).toNodeId();
+        }
+        if (searchAlg >= 0){
+            return edges.get(searchAlg).fromNodeId();
+        }
+
         // Find which node the position is closest to
         else{
             double node1 = lengthList[Math.abs(searchAlg)-2];
             double node2 = lengthList[Math.abs(searchAlg)-1];
 
              if (Math.abs(node1-position) <= Math.abs(node2-position)){
-                 return edges.get((int)node1).fromNodeId();
+                 return edges.get(Math.abs(searchAlg)-2).fromNodeId();
              }
              else{
-                 return edges.get((int)node1).toNodeId();
+                 return edges.get(Math.abs(searchAlg)-2).toNodeId();
              }
         }
     }
