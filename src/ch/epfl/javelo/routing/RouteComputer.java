@@ -16,15 +16,57 @@ public final class RouteComputer {
         this.costFunction = costFunction;
     }
 
+    /**
+     * Private function used in bestRouteBetween, calculates the fastest path taken to a destination
+     * @param startNodeId the ID of the first node
+     * @param endNodeId the ID of the last node
+     * @param predecesor the list of predecessors to find the way
+     * @return the SingleRoute that is the best Route between 2 nodes
+     */
+    private Route calculateWay(int startNodeId, int endNodeId, int[] predecesor){
 
+        List<Integer> reverseList = new ArrayList<>();
+        List<Edge> edgeList = new ArrayList<>();
+        reverseList.add(endNodeId);
+        int P = endNodeId;
+
+        do{
+            P = predecesor[P];
+            reverseList.add(P);
+        }while(P != startNodeId);
+
+        for (int i = reverseList.size()-1; i > 0 ; i--) {
+
+            int nodeNum = graph.nodeOutDegree(reverseList.get(i));
+            int edgeId = 0;
+
+            for (int j = 0; j < nodeNum ; j++) {
+                if(graph.edgeTargetNodeId(graph.nodeOutEdgeId(reverseList.get(i),j)) == reverseList.get(i-1)){
+                    edgeId = graph.nodeOutEdgeId(reverseList.get(i),j);
+                }
+            }
+            edgeList.add(Edge.of(graph, edgeId, reverseList.get(i), reverseList.get(i-1)));
+        }
+        return new SingleRoute(edgeList);
+    }
+
+
+    /**
+     *
+     * @param startNodeId Id of the startNode of the Route
+     * @param endNodeId Id of the endNode of the Route
+     * @return A SingleRoute
+     */
     public Route bestRouteBetween(int startNodeId, int endNodeId){
 
         Preconditions.checkArgument(startNodeId != endNodeId);
+
         List<Integer> exploring = new ArrayList<>();
-        List<Edge> edgeList = new ArrayList<>();
         float[] distance = new float[graph.nodeCount()];
         int[] predecesor = new int[graph.nodeCount()];
 
+
+        // Dijsktra Algorithm to find the shortest path
         for (int i = 0; i < distance.length; i++) {
             distance[i] = Float.POSITIVE_INFINITY;
             predecesor[i] = 0;
@@ -36,7 +78,6 @@ public final class RouteComputer {
         int nPrime;
         float d;
         int edgeID;
-
 
         while(!exploring.isEmpty()){
             int tempIndex=0;
@@ -50,7 +91,7 @@ public final class RouteComputer {
             N = exploring.remove(tempIndex);
 
             if (N == endNodeId){
-                break;
+                return calculateWay(startNodeId, endNodeId, predecesor);
             }
 
             for (int i = 0; i < graph.nodeOutDegree(N); i++) {
@@ -65,37 +106,7 @@ public final class RouteComputer {
                 }
             }
         }
-
-
-        List<Integer> reverseList = new ArrayList<>();
-
-        reverseList.add(endNodeId);
-
-        int P = endNodeId;
-
-
-       while (P != startNodeId) {
-           P = predecesor[P];
-           reverseList.add(P);
-       }
-
-        for (int i = 0; i < reverseList.size()-1 ; i++) {
-
-            int nodeNum = graph.nodeOutDegree(reverseList.get(i+1));
-
-            int edgeId = 0;
-            for (int j = 0; j < nodeNum ; j++) {
-
-                if(graph.edgeTargetNodeId(graph.nodeOutEdgeId(reverseList.get(i+1),j)) == reverseList.get(i)){
-                   edgeId = graph.nodeOutEdgeId(reverseList.get(i+1),j);
-               }
-            }
-            edgeList.add(Edge.of(graph, edgeId, reverseList.get(i+1), reverseList.get(i)));
-        }
-
-
-
-        return new SingleRoute(edgeList);
+        return null;
     }
 
 
