@@ -1,6 +1,7 @@
 package ch.epfl.javelo.routing;
 
 import ch.epfl.javelo.Math2;
+import ch.epfl.javelo.Preconditions;
 import ch.epfl.javelo.projection.PointCh;
 
 import java.util.ArrayList;
@@ -12,18 +13,12 @@ public final class MultiRoute implements Route{
     private final List<Route> segments;
     private final double[] segmentLengths;
     public MultiRoute(List<Route> segments){
+        Preconditions.checkArgument(!segments.isEmpty());
         this.segments = List.copyOf(segments);
         this.segmentLengths = new double[segments.size() + 1];
         for(int i = 0; i < segments.size(); i++){
             segmentLengths[i + 1] = segments.get(i).length();
         }
-    }
-    private double positionCorrection(double position){
-        double length = 0;
-        for (int i = 0; i < segments.size(); i++) { //check if it is < or <=
-            length += segments.get(i).length();
-        }
-        return Math2.clamp(0, position, length);
     }
     /**
      * @param position
@@ -31,16 +26,18 @@ public final class MultiRoute implements Route{
      */
     @Override
     public int indexOfSegmentAt(double position) {
-        position = positionCorrection(position);
-        double segmentStart = 0, segmentEnd = 0;
-        for (int i = 0; i < segments.size() ; i++) {
-            segmentEnd += segments.get(i).length();
-            if(position >= segmentStart && position <= segmentEnd){
-            return i;
+        double length = 0;
+        int count = 0, id = 0;
+        while ( Math2.clamp(0, position, this.length()) - length > 0){
+            if ( Math2.clamp(0, position, this.length()) - length <= segments.get(count).length()){
+                id += segments.get(count).indexOfSegmentAt( Math2.clamp(0, position, this.length()) - length) ;
+            } else{
+                id += segments.get(count).indexOfSegmentAt(segments.get(count).length()) + 1;
             }
-            segmentStart = segmentEnd;
-         }
-         return segments.size() - 1;
+            length += segments.get(count).length();
+            count++;
+        }
+        return id;
     }
 
     /**
@@ -75,6 +72,9 @@ public final class MultiRoute implements Route{
         List<PointCh> pointCH = new ArrayList<>();
         for (int i = 0; i < segments.size(); i++) {
             pointCH.addAll(segments.get(i).points());
+            if(i != segments.size() - 1){
+                pointCH.remove(pointCH.size() - 1);
+            }
         }
         return pointCH;
     }
@@ -85,9 +85,15 @@ public final class MultiRoute implements Route{
      */
     @Override
     public PointCh pointAt(double position) {
-        position = positionCorrection(position);
-        int id = binaryIdResearch(position);
-        return segments.get(id).pointAt(position - segments.get(id).length());
+        position =  Math2.clamp(0, position, length());
+        for(int i = 0; i < segments.size(); i++){
+            if(segments.get(i).length() < position){
+                position -= segments.get(i).length();
+            } else{
+                return segments.get(i).pointAt(position);
+            }
+        }
+        return null;
     }
 
     /**
@@ -96,9 +102,15 @@ public final class MultiRoute implements Route{
      */
     @Override
     public double elevationAt(double position) {
-        position = positionCorrection(position);
-        int id = binaryIdResearch(position);
-        return segments.get(id).elevationAt(position - segments.get(id).length());
+        position =  Math2.clamp(0, position, length());
+        for(int i = 0; i < segments.size(); i++){
+            if(segments.get(i).length() < position){
+                position -= segments.get(i).length();
+            } else{
+                return segments.get(i).elevationAt(position);
+            }
+        }
+        return 0;
     }
 
     /**
@@ -107,9 +119,18 @@ public final class MultiRoute implements Route{
      */
     @Override
     public int nodeClosestTo(double position) {
-        position = positionCorrection(position);
-        int id = binaryIdResearch(position);
-        return segments.get(id).nodeClosestTo(position - segments.get(id).length());
+        double length = 0;
+        int count = 0, node = 0;
+        while (Math2.clamp(0, position, this.length()) - length > 0) {
+            if (Math2.clamp(0, position, this.length()) - length <= segments.get(count).length()) {
+                node = segments.get(count).nodeClosestTo((Math2.clamp(0, position, this.length()) - length) + 1);
+            } else {
+                node = segments.get(count).nodeClosestTo(segments.get(count).length()) ;
+            }
+            length += segments.get(count).length();
+            count++;
+        }
+        return node;
     }
 
     /**
@@ -118,22 +139,12 @@ public final class MultiRoute implements Route{
      */
     @Override
     public RoutePoint pointClosestTo(PointCh point) {
-        RoutePoint closestPoint = RoutePoint.NONE;
-        for (int i = 0; i < segments.size(); i++) {
-            closestPoint = closestPoint.min(segments.get(i).pointClosestTo(point));
+        RoutePoint PointCH = RoutePoint.NONE;
+        double sum = 0;
+        for(Route r : segments){
+            PointCH= PointCH.min(r.pointClosestTo(point).withPositionShiftedBy(sum));
+            sum += r.length();
         }
-        return closestPoint;
+        return PointCH;
     }
-
-    private int binaryIdResearch(double position){
-        int id = binarySearch(segmentLengths, position);
-        if(id < 0){
-            id = -(id + 2);
-        }
-        if(id == segmentLengths.length - 1){
-            id--;
-        }
-        return id;
-    }
-
 }
