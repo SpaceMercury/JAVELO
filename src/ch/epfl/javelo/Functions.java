@@ -7,13 +7,15 @@ import java.util.function.DoubleUnaryOperator;
  */
 public final class Functions {
 
+    /**
+     * Private constructor, class cannot be instantiated
+     */
     private Functions(){
-
     }
 
 
-    public static DoubleUnaryOperator constant(double y){
 
+    public static DoubleUnaryOperator constant(double y){
         return new Constant(y);
     }
 

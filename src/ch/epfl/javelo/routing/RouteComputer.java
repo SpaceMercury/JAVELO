@@ -11,7 +11,6 @@ import java.util.List;
  */
 public final class RouteComputer {
 
-
     private Graph graph;
     private CostFunction costFunction;
 
@@ -68,13 +67,22 @@ public final class RouteComputer {
      */
     public Route bestRouteBetween(int startNodeId, int endNodeId){
 
+        //Nested WeightedNode record
+        record WeightedNode(int nodeId, float distance) implements Comparable<WeightedNode> {
+            @Override
+            public int compareTo(WeightedNode that) {
+                return Float.compare(this.distance, that.distance);
+            }
+
+        }
+
         // Throw IllegalArgumentException if the startNode is the same as the endNode
         Preconditions.checkArgument(startNodeId != endNodeId);
 
+        //Creation of the arrays we will use in A-star algorithm
         List<Integer> exploring = new ArrayList<>();
         float[] distance = new float[graph.nodeCount()];
         int[] predecessor = new int[graph.nodeCount()];
-
 
         // All distances set to INFINITY, and all predecessors set to an arbitrary value (0)
         for (int i = 0; i < distance.length; i++) {
@@ -91,6 +99,7 @@ public final class RouteComputer {
         int edgeID;
 
         while(!exploring.isEmpty()){
+
             int tempIndex=0;
             int N = exploring.get(0);
             for (int i = 0; i < exploring.size(); i++) {

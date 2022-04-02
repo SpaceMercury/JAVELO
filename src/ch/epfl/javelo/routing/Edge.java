@@ -26,14 +26,29 @@ public record Edge(int fromNodeId, int toNodeId, PointCh fromPoint, PointCh toPo
         return new Edge(fromNodeId, toNodeId, graph.nodePoint(fromNodeId), graph.nodePoint(toNodeId), graph.edgeLength(edgeId), graph.edgeProfile(edgeId));
     }
 
+    /**
+     *
+     * @param point
+     * @return
+     */
     public double positionClosestTo(PointCh point){
         return Math2.projectionLength(fromPoint.e(), fromPoint.n(), toPoint.e(), toPoint.n(), point.e(), point.n());
     }
 
+    /**
+     *
+     * @param position
+     * @return
+     */
     public PointCh pointAt(double position){
         return new PointCh(fromPoint.e() + ((position/length) * (toPoint.e()-fromPoint.e()) ), fromPoint.n() + ((position/length) * (toPoint.n()-fromPoint.n())));
     }
 
+    /**
+     *
+     * @param position
+     * @return
+     */
     public double elevationAt(double position){
         return profile.applyAsDouble(position);
     }

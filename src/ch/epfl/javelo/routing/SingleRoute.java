@@ -64,7 +64,7 @@ public final class SingleRoute implements Route{
     }
 
     /**
-     * @return all of the points (nodes) located on the edges of the itinerary
+     * @return All the points (nodes) located on the edges of the itinerary
      */
     @Override
     public List<PointCh> points() {
