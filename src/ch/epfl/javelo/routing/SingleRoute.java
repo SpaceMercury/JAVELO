@@ -21,7 +21,6 @@ public final class SingleRoute implements Route{
 
         Preconditions.checkArgument(edges.size() > 0);
         this.edges = List.copyOf(edges);
-
     }
 
 
