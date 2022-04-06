@@ -15,8 +15,14 @@ import java.util.List;
  */
 public final class SingleRoute implements Route{
 
-    List<Edge> edges;
+    private List<Edge> edges;
 
+
+
+    /**
+     * SingleRoute constructor, builds a SingleRoute with all the edges given as a parameter
+     * @param edges List of edges
+     */
     public SingleRoute(List<Edge> edges){
 
         Preconditions.checkArgument(edges.size() > 0);
@@ -24,20 +30,12 @@ public final class SingleRoute implements Route{
     }
 
 
-    /**
+    /** Function always returns 0 for SingleRoute
      * @param position desired double position
      * @return the index of the segment of an itinerary at position
      */
     @Override
     public int indexOfSegmentAt(double position) {
-        /**double segmentStart = 0, segmentEnd = 0;
-        for (int i = 0; i < edges.size() ; i++) {
-            segmentEnd += edges.get(i).length();
-            if(position >= segmentStart && position <= segmentEnd && i >= 1){
-                return i;
-            }
-            segmentStart = segmentEnd;
-        }*/
         return 0;
     }
 
@@ -218,13 +216,12 @@ public final class SingleRoute implements Route{
         RoutePoint smallestRoutePoint = RoutePoint.NONE;
 
         double position;
-        double edgepos;
-
+        double edgePos;
 
         for (Edge edge : edges) {
             position = Math2.clamp(0, edge.positionClosestTo(point), edge.length());
-            edgepos = position + lengthList[edges.indexOf(edge)];
-            smallestRoutePoint = smallestRoutePoint.min(edge.pointAt(position), edgepos, point.distanceTo(edge.pointAt(position)));
+            edgePos = position + lengthList[edges.indexOf(edge)];
+            smallestRoutePoint = smallestRoutePoint.min(edge.pointAt(position), edgePos, point.distanceTo(edge.pointAt(position)));
         }
 
         return smallestRoutePoint;
