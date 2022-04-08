@@ -3,6 +3,7 @@ package ch.epfl.javelo;
 import java.util.function.DoubleUnaryOperator;
 
 /**
+ * @author ventura
  * @author fuentes
  */
 public final class Functions {

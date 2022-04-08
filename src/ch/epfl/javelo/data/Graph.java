@@ -27,10 +27,10 @@ public class Graph {
 
     /**
      * Constructor of the graph class
-     * @param nodes
-     * @param sectors
-     * @param edges
-     * @param attributeSets
+     * @param nodes graphnodes of the new Graph
+     * @param sectors graphsectors of the new Graph
+     * @param edges graphedges of the new Graph
+     * @param attributeSets list of attribute sets of the new graph
      */
     public Graph(GraphNodes nodes, GraphSectors sectors, GraphEdges edges, List<AttributeSet> attributeSets){
         this.nodes = nodes;
@@ -42,9 +42,9 @@ public class Graph {
 
     /**
      *
-     * @param basePath
+     * @param basePath Location of the files from which to read
      * @return a new Graph with the attributes which have been loaded from the bin files
-     * @throws IOException
+     * @throws IOException in the case of an I/O error, like a file not existing
      */
     public static Graph loadFrom(Path basePath) throws IOException {
         Path nodePath = basePath.resolve("nodes.bin");
@@ -92,7 +92,7 @@ public class Graph {
 
     /**
      *
-     * @return
+     * @return the total numbers of nodes contained in the graph
      */
     public int nodeCount(){
         return nodes.count();
@@ -101,7 +101,7 @@ public class Graph {
     /**
      *
      * @param nodeId the ID of the node
-     * @return
+     * @return the point at the node with the given nodeId
      */
     public PointCh nodePoint(int nodeId){
         return new PointCh(nodes.nodeE(nodeId), nodes.nodeN(nodeId));
@@ -110,7 +110,7 @@ public class Graph {
     /**
      *
      * @param nodeId Index of the node
-     * @return
+     * @return number of edges going out of the node
      */
     public int nodeOutDegree(int nodeId){
         return nodes.outDegree(nodeId);
@@ -119,8 +119,8 @@ public class Graph {
     /**
      *
      * @param nodeId Index of the node
-     * @param edgeIndex
-     * @return
+     * @param edgeIndex i
+     * @return index of i-th edge going out of the node with index nodeId
      */
     public int nodeOutEdgeId(int nodeId, int edgeIndex){
         return nodes.edgeId(nodeId, edgeIndex);
@@ -128,9 +128,9 @@ public class Graph {
 
     /**
      * Method that finds the closest Node to a point by comparing the square of the distances.
-     * @param point
-     * @param searchDistance
-     * @return
+     * @param point in respect to which the node is looked for
+     * @param searchDistance distance within which the node is to be found
+     * @return the id of the node closest to said point
      */
     public int nodeClosestTo(PointCh point, double searchDistance){
         List<GraphSectors.Sector> inArea = sectors.sectorsInArea(point, searchDistance);
@@ -169,7 +169,7 @@ public class Graph {
     /**
      *
      * @param edgeId Index of the edge
-     * @return
+     * @return the set of attributes of the specified edge
      */
     public AttributeSet edgeAttributes(int edgeId){
         return attributeSets.get(this.edges.attributesIndex(edgeId));
@@ -178,7 +178,7 @@ public class Graph {
     /**
      *
      * @param edgeId Index of the edge
-     * @return
+     * @return length of the specified edge
      */
     public double edgeLength(int edgeId){
         return edges.length(edgeId);
@@ -187,7 +187,7 @@ public class Graph {
     /**
      *
      * @param edgeId Index of the edge
-     * @return
+     * @return elevation gain on the specified edge
      */
     public double edgeElevationGain(int edgeId){
         return edges.elevationGain(edgeId);
