@@ -36,6 +36,12 @@ public final class KmlPrinter {
                     "  </Document>\n" +
                     "</kml>";
 
+    /**
+     *
+     * @param fileName name of file to be filled in
+     * @param route of which the information is to be copied
+     * @throws IOException on I/O exception
+     */
     public static void write(String fileName, Route route)
             throws IOException {
         try (PrintWriter w = new PrintWriter(fileName)) {

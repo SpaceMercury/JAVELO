@@ -17,7 +17,7 @@ public final class MultiRoute implements Route{
      * Constructor of Multiroute, creates a Multiroute with the edges corresponding to
      * the ones in the list segments, and assigning the length of each segment into
      * the list of segment lengths
-     * @param segments
+     * @param segments the list of segments to be assigned to the new route
      */
     public MultiRoute(List<Route> segments){
         Preconditions.checkArgument(!segments.isEmpty());

@@ -4,6 +4,7 @@ import ch.epfl.javelo.projection.PointCh;
 
 import java.util.List;
 
+@SuppressWarnings("ALL")
 public interface Route {
 
 

@@ -17,9 +17,8 @@ public final class ElevationProfile {
 
     /**
      * Public constructor of ElevationProfile
-     *
-     * @param length
-     * @param elevationSamples
+     * @param length length of new elevation profile
+     * @param elevationSamples list of elevation samples of new elevation profile(-> the profile)
      */
     public ElevationProfile(double length, float[] elevationSamples) {
 
