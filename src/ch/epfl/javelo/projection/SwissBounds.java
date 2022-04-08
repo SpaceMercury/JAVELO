@@ -9,10 +9,14 @@ import ch.epfl.javelo.Math2;
 public final class SwissBounds {
 
 
+    /**
+     * Non-instantiable class therefore we use a private Constructor
+     */
     private SwissBounds(){
-
     }
 
+
+    // Constants for the limits of the SwissBounds
     final static public double MIN_E = 2485000;
     final static public double MAX_E = 2834000;
     final static public double MIN_N = 1075000;
@@ -23,8 +27,8 @@ public final class SwissBounds {
 
     /**
      *
-     * @param e
-     * @param n
+     * @param e E coordinate in the Swiss Coordinate system
+     * @param n N Coordinate in the Swiss Coordinate system
      * @return True if and only if the parameters are in bounds of Switzerland's borders
      */
     public static boolean containsEN(double e, double n) {

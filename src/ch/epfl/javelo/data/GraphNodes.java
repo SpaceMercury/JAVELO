@@ -38,7 +38,7 @@ public record GraphNodes(IntBuffer buffer){
     /**
      * Function that provides us with the N coordinate of a desired node
      * @param nodeID used to identify which node will be used, starts at 0
-     * @return
+     * @return returns the N coordinate as a double
      */
     public double nodeN(int nodeID) {
         return Q28_4.asDouble(buffer.get((nodeID*NODE_INTS)+OFFSET_N));
@@ -56,7 +56,7 @@ public record GraphNodes(IntBuffer buffer){
     /**
      *
      * @param nodeID used to indetify which node will be used, starts at 0
-     * @param edgeIndex
+     * @param edgeIndex the Index of the edge coming out of a node, starts at 0
      * @return the identity of the edgeIndex'th edge coming out of a desired node
      */
     public int edgeId(int nodeID, int edgeIndex) {
