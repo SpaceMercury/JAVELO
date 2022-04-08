@@ -12,6 +12,13 @@ import static java.util.Arrays.binarySearch;
 public final class MultiRoute implements Route{
     private final List<Route> segments;
     private final double[] segmentLengths;
+
+    /**
+     * Constructor of Multiroute, creates a Multiroute with the edges corresponding to
+     * the ones in the list segments, and assigning the length of each segment into
+     * the list of segment lengths
+     * @param segments
+     */
     public MultiRoute(List<Route> segments){
         Preconditions.checkArgument(!segments.isEmpty());
         this.segments = List.copyOf(segments);
@@ -21,8 +28,9 @@ public final class MultiRoute implements Route{
         }
     }
     /**
-     * @param position
-     * @return
+     * Gives the index of the segment at the desired position
+     * @param position the chosen position
+     * @return the index of the segment at that position
      */
     @Override
     public int indexOfSegmentAt(double position) {
@@ -41,7 +49,7 @@ public final class MultiRoute implements Route{
     }
 
     /**
-     * @return
+     * @return the length of the route in meters
      */
     @Override
     public double length() {
@@ -53,7 +61,8 @@ public final class MultiRoute implements Route{
     }
 
     /**
-     * @return
+     * Getter for the edges of the itinerary
+     * @return all the edges on the itinerary
      */
     @Override
     public List<Edge> edges() {
@@ -65,7 +74,7 @@ public final class MultiRoute implements Route{
     }
 
     /**
-     * @return
+     * @return a list of all the points located on the edges of the subsegments of the route
      */
     @Override
     public List<PointCh> points() {
@@ -80,8 +89,9 @@ public final class MultiRoute implements Route{
     }
 
     /**
-     * @param position
-     * @return
+     * Gives the point at the chosen position in respect to the start of the itinerary
+     * @param position chosen position
+     * @return point at the specified position
      */
     @Override
     public PointCh pointAt(double position) {
@@ -97,8 +107,9 @@ public final class MultiRoute implements Route{
     }
 
     /**
-     * @param position
-     * @return
+     * Gives the altitude at the chosen position in respect to the start of the itinerary
+     * @param position the chosen position
+     * @return the altitude at the position
      */
     @Override
     public double elevationAt(double position) {
@@ -114,8 +125,9 @@ public final class MultiRoute implements Route{
     }
 
     /**
-     * @param position
-     * @return
+     * Gives the index of the closest node at the chosen position in respect to the start of the itinerary
+     * @param position position at which the node shall be searched for
+     * @return returns index of closest node to the position
      */
     @Override
     public int nodeClosestTo(double position) {
@@ -134,8 +146,9 @@ public final class MultiRoute implements Route{
     }
 
     /**
-     * @param point
-     * @return
+     * Gives the closest point on the itinerary to the PointCh chosen
+     * @param point PointCh to which the closest point shall be found
+     * @return closest point on the itinerary to the PointCh
      */
     @Override
     public RoutePoint pointClosestTo(PointCh point) {

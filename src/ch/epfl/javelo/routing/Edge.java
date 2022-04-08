@@ -15,7 +15,9 @@ public record Edge(int fromNodeId, int toNodeId, PointCh fromPoint, PointCh toPo
 
 
     /**
-     *
+     * Static constructor of edge, that makes fromNodeId and toNodeId the given ones
+     * and affects the corresponding attributes of the edge with id edgeId from graph to the rest
+     * of the attributes
      * @param graph
      * @param edgeId
      * @param fromNodeId

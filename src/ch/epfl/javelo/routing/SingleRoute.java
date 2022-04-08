@@ -30,7 +30,8 @@ public final class SingleRoute implements Route{
     }
 
 
-    /** Function always returns 0 for SingleRoute
+    /**
+     * Function always returns 0 for SingleRoute
      * @param position desired double position
      * @return the index of the segment of an itinerary at position
      */
@@ -53,7 +54,7 @@ public final class SingleRoute implements Route{
 
     /**
      * Getter for the edges of the list
-     * @return all the edges of the itinerary
+     * @return all the edges of the segment
      */
     @Override
     public List<Edge> edges() {
@@ -61,7 +62,7 @@ public final class SingleRoute implements Route{
     }
 
     /**
-     * @return All the points (nodes) located on the edges of the itinerary
+     * @return All the points (nodes) located on the edges of the segment
      */
     @Override
     public List<PointCh> points() {
@@ -76,7 +77,7 @@ public final class SingleRoute implements Route{
     }
 
     /**
-     *
+     * Gives the point at the chosen position in respect to the start of the itinerary
      * @param position desired position
      * @return the point at the given position of the itinerary
      */
@@ -112,7 +113,7 @@ public final class SingleRoute implements Route{
     }
 
     /**
-     *
+     * Gives the altitude at the chosen position in respect to the start of the itinerary
      * @param position desired position
      * @return the altitude at the given position (can be NaN if the edge has no profile)
      */
@@ -153,7 +154,7 @@ public final class SingleRoute implements Route{
     }
 
     /**
-     *
+     * Gives the index of the closest node at the chosen position in respect to the start of the itinerary
      * @param position the desired position
      * @return the index of the node that is closest to that position
      */
@@ -198,7 +199,7 @@ public final class SingleRoute implements Route{
     }
 
     /**
-     *
+     * Gives the closest point on the itinerary to the PointCh chosen
      * @param point given PointCh point
      * @return the closes point on the itinerary to the given point
      */

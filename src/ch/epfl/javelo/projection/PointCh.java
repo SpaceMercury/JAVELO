@@ -19,9 +19,9 @@ public record PointCh(double e, double n) {
     }
 
     /**
-     * Gives squared distance
-     * @param that
-     * @return
+     * Gives squared distance of a point to another point
+     * @param that the point in relation to which the squared distance is measured
+     * @return the square of the distance to that point in meters
      */
     public double squaredDistanceTo(PointCh that) {
         return Math2.squaredNorm(that.e - this.e, that.n - this.n);
@@ -37,7 +37,7 @@ public record PointCh(double e, double n) {
     }
 
     /**
-     *
+     * Gives WGS84 longitude of point in radians from PointCh coordinates
      * @return the longitude of the point in the WGS84 system in radians
      */
     public double lon() {
@@ -45,7 +45,7 @@ public record PointCh(double e, double n) {
     }
 
     /**
-     *
+     * Gives WGS84 latitude of point in radians from PointCh coordinates
      * @return the latitude of the point in the WGS84 system in radians
      */
     public double lat() {

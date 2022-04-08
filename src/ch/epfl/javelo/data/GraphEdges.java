@@ -16,7 +16,6 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
 
 
     //Constants used in the classes
-    //TODO: make this into an enum, I read somewhere that using enums is better than constants.
     private static final int OFFSET_1 = 0;
     private static final int OFFSET_LENGTH = OFFSET_1 + 4;
     private static final int OFFSET_GRADIENT = OFFSET_LENGTH + 2;
@@ -69,9 +68,9 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
 
 
     /**
-     *
-     * @param edgeID
-     * @return
+     * Method that gives elevation gain on a certain edge.
+     * @param edgeID ID of selected edge
+     * @return Elevation gain on that selected edge
      */
     public double elevationGain(int edgeID) {
         return Q28_4.asDouble(Short.toUnsignedInt(edgesBuffer.getShort(edgeID*TOTAl_EDGE + OFFSET_GRADIENT)));
@@ -93,9 +92,10 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
 
 
     /**
-     *
-     * @param edgeID
-     * @return
+     * Method that returns a table with the profiles of all parts of an edge,
+     * that is empty if the edge does not have a profile.
+     * @param edgeID ID of selected edge
+     * @return The table of profiles of the edge
      */
     public float[] profileSamples(int edgeID) {
 
@@ -146,9 +146,10 @@ public record GraphEdges(ByteBuffer edgesBuffer, IntBuffer profileIds, ShortBuff
 
 
     /**
-     *
-     * @param edgeID
-     * @return
+     * Method that returns the identity of the attribute set attached
+     * to a selected edge.
+     * @param edgeID ID of selected edge
+     * @return identity of attribute set connected to an edge
      */
     public int attributesIndex(int edgeID) {
         return Short.toUnsignedInt(edgesBuffer.getShort(edgeID*TOTAl_EDGE + OFFSET_IDENTITY));
