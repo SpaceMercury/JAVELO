@@ -5,6 +5,7 @@ import ch.epfl.javelo.data.Graph;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
 
 /**
  * @author fuentes
@@ -67,6 +68,7 @@ public final class RouteComputer {
      */
     public Route bestRouteBetween(int startNodeId, int endNodeId){
 
+
         //Nested WeightedNode record
         record WeightedNode(int nodeId, float distance) implements Comparable<WeightedNode> {
             @Override
@@ -80,9 +82,9 @@ public final class RouteComputer {
         Preconditions.checkArgument(startNodeId != endNodeId);
 
         //Creation of the arrays we will use in A-star algorithm
-        List<Integer> exploring = new ArrayList<>();
-        float[] distance = new float[graph.nodeCount()];
-        int[] predecessor = new int[graph.nodeCount()];
+        PriorityQueue<WeightedNode> exploration = new PriorityQueue<>();
+        float[] distance = new float[graph.nodeCount()+1];
+        int[] predecessor = new int[graph.nodeCount()+1];
 
         // All distances set to INFINITY, and all predecessors set to an arbitrary value (0)
         for (int i = 0; i < distance.length; i++) {
@@ -91,25 +93,18 @@ public final class RouteComputer {
         }
 
         distance[startNodeId] = 0;
-        //List of nodes we are exploring
-        exploring.add(startNodeId);
+        //Adding the first WeightedNode
+        exploration.add(new WeightedNode(startNodeId,0));
 
+        //Temporary constants that we use later for the algorithm
         int nPrime;
         float d;
         int edgeID;
 
-        while(!exploring.isEmpty()){
+        while(!exploration.isEmpty()){
 
-            int tempIndex=0;
-            int N = exploring.get(0);
-            for (int i = 0; i < exploring.size(); i++) {
-                if (distance[N] > distance[exploring.get(i)] ){
-                    N = exploring.get(i);
-                    tempIndex = i;
-                }
-            }
-            // Removes the node we are about to explore from the list
-            N = exploring.remove(tempIndex);
+            //Remove method from PriorityQueue removes the node with the smallest distance
+             int N = exploration.remove().nodeId;
 
             // If the node we found is the same as the endNode, we have sucessfully found the quickest route
             if (N == endNodeId){
@@ -120,15 +115,18 @@ public final class RouteComputer {
             for (int i = 0; i < graph.nodeOutDegree(N); i++) {
                 edgeID = graph.nodeOutEdgeId(N, i);
                 nPrime = graph.edgeTargetNodeId(edgeID);
-                d = distance[N] +  (float)costFunction.costFactor(N, edgeID)*(float)graph.edgeLength(edgeID);
+                d = distance[N] + (float)costFunction.costFactor(N, edgeID)*(float)graph.edgeLength(edgeID);
 
-                if( d < distance[nPrime] ){
+                if( d < distance[nPrime] && d != Float.NEGATIVE_INFINITY ){
                     distance[nPrime] = d;
                     predecessor[nPrime] = N;
-                    exploring.add(nPrime);
+                    exploration.add(new WeightedNode(nPrime, distance[nPrime]));
                 }
             }
+            //Set the distance of the selected node to -inf, so we don't explore nodes we've already explored
+            distance[N] = Float.NEGATIVE_INFINITY;
         }
+        //If no itinerary exists return null
         return null;
     }
 
