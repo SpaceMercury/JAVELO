@@ -8,11 +8,11 @@ public class GpxGenerator {
     private GpxGenerator(){
     }
 
-    createGpx(){
+    //createGpx(){
 
-    }
-
-    wirteGpx(){
-
-    }
+//    }
+//
+//    wirteGpx(){
+//
+//    }
 }
