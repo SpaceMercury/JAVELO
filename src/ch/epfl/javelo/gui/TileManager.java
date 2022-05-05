@@ -4,9 +4,7 @@ import ch.epfl.javelo.Preconditions;
 import javafx.scene.image.Image;
 
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -17,22 +15,22 @@ public final class TileManager {
 
     LinkedHashMap cache = new LinkedHashMap();
 
-    public TileManager(Path access, String serverName){
-
-
-
-    }
-
-    public Image imageForTileAt (TileId id) throws IOException {
-
+    public TileManager(Path access, String serverName)throws IOException{
         URL u = new URL(
                 "https://tile.openstreetmap.org/19/271725/185422.png");
         URLConnection c = u.openConnection();
         c.setRequestProperty("User-Agent", "JaVelo");
         InputStream i = c.getInputStream();
         i.close();
+        OutputStream os = new FileOutputStream("src/a/b/");
+        os.close();
+    }
 
-        return new Image();
+    public Image imageForTileAt (TileId id) throws FileNotFoundException {
+
+
+
+        return new Image(new FileInputStream("src/a/b/c.text"));
     }
 
 

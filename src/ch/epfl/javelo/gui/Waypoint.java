@@ -5,4 +5,5 @@ import ch.epfl.javelo.projection.Ch1903;
 
 public record Waypoint(Ch1903 waypoint, int nodeId) {
 
+
 }
