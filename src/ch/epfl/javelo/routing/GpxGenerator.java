@@ -6,6 +6,7 @@ import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -81,7 +82,7 @@ public class GpxGenerator {
             Transformer transformer = TransformerFactory
                     .newDefaultInstance()
                     .newTransformer();
-            transformer.setOutputProperty(OutPutKeys.INDENT, "yes");
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.transform(new DOMSource(doc), new StreamResult(w));
         } catch (TransformerException e) {
             throw new Error(e);
