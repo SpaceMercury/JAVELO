@@ -10,9 +10,9 @@ import java.util.DoubleSummaryStatistics;
  */
 public final class ElevationProfile {
 
-    private float[] elevationSamples;
-    private double length;
-    DoubleSummaryStatistics stats = new DoubleSummaryStatistics();
+    private final float[] elevationSamples;
+    private final double length;
+    private final DoubleSummaryStatistics stats = new DoubleSummaryStatistics();
 
 
     /**
@@ -24,13 +24,12 @@ public final class ElevationProfile {
 
         Preconditions.checkArgument(length > 0 && elevationSamples.length >=2);
         this.length = length;
-        this.elevationSamples = elevationSamples;
+        this.elevationSamples = elevationSamples.clone();
 
         // Usage of DoubleSummaryStatistics to simplify task of finding min and max elevation
         for (float elevationSample : elevationSamples) {
             stats.accept(elevationSample);
         }
-
 
     }
 

@@ -14,7 +14,6 @@ public final class WebMercator {
 
 
     /**
-     *
      * @param lon longitude in radians
      * @return x position on the Mercator coordinate system
      */
@@ -24,7 +23,6 @@ public final class WebMercator {
     }
 
     /**
-     *
      * @param lat latitude in radians
      * @return y on the Mercator coordinate system
      */
@@ -34,24 +32,19 @@ public final class WebMercator {
     }
 
     /**
-     *
      * @param x the x coordinate on the Mercator coordinate system
      * @return in radians the longitude of that coordinate
      */
     public static double lon(double x){
-
         return (2*Math.PI*x) - Math.PI;
     }
 
     /**
-     *
      * @param y the y coordiante on the Mercator coordinate system
      * @return in radians the latitude of that coordinate
      */
     public static double lat(double y){
-
         return Math.atan(Math.sinh(Math.PI - (2*Math.PI*y)));
-
     }
 
 }

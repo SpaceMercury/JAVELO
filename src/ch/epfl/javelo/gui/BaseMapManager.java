@@ -10,6 +10,8 @@ public final class BaseMapManager {
 
     Scene canvas;
     Scene pane;
+
+
 //    public BaseMapManager(TileManager tileManager, Scene pane){
 //
 //        canvas = new Scene();

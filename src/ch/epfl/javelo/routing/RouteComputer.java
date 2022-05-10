@@ -37,12 +37,12 @@ public final class RouteComputer {
         List<Integer> reverseList = new ArrayList<>();
         List<Edge> edgeList = new ArrayList<>();
         reverseList.add(endNodeId);
-        int P = endNodeId;
+        int p = endNodeId;
 
         do{
-            P = predecessor[P];
-            reverseList.add(P);
-        }while(P != startNodeId);
+            p = predecessor[p];
+            reverseList.add(p);
+        }while(p != startNodeId);
 
         for (int i = reverseList.size()-1; i > 0 ; i--) {
 
@@ -89,7 +89,6 @@ public final class RouteComputer {
         // All distances set to INFINITY, and all predecessors set to an arbitrary value (0)
         for (int i = 0; i < distance.length; i++) {
             distance[i] = Float.POSITIVE_INFINITY;
-            predecessor[i] = 0;
         }
 
         distance[startNodeId] = 0;
@@ -104,27 +103,27 @@ public final class RouteComputer {
         while(!exploration.isEmpty()){
 
             //Remove method from PriorityQueue removes the node with the smallest distance
-             int N = exploration.remove().nodeId;
+             int n = exploration.remove().nodeId;
 
             // If the node we found is the same as the endNode, we have sucessfully found the quickest route
-            if (N == endNodeId){
+            if (n == endNodeId){
                 // Calls the private method calculateWay
                 return calculateWay(startNodeId, endNodeId, predecessor);
             }
 
-            for (int i = 0; i < graph.nodeOutDegree(N); i++) {
-                edgeID = graph.nodeOutEdgeId(N, i);
+            for (int i = 0; i < graph.nodeOutDegree(n); i++) {
+                edgeID = graph.nodeOutEdgeId(n, i);
                 nPrime = graph.edgeTargetNodeId(edgeID);
-                d = distance[N] + (float)costFunction.costFactor(N, edgeID)*(float)graph.edgeLength(edgeID);
+                d = distance[n] + (float)costFunction.costFactor(n, edgeID)*(float)graph.edgeLength(edgeID);
 
                 if( d < distance[nPrime] && d != Float.NEGATIVE_INFINITY ){
                     distance[nPrime] = d;
-                    predecessor[nPrime] = N;
+                    predecessor[nPrime] = n;
                     exploration.add(new WeightedNode(nPrime, distance[nPrime]));
                 }
             }
             //Set the distance of the selected node to -inf, so we don't explore nodes we've already explored
-            distance[N] = Float.NEGATIVE_INFINITY;
+            distance[n] = Float.NEGATIVE_INFINITY;
         }
         //If no itinerary exists return null
         return null;

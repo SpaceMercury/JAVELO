@@ -4,6 +4,8 @@ import ch.epfl.javelo.Preconditions;
 
 public record PointWebMercator(double x, double y) {
 
+    private static final int BASE_ZOOM = 8;
+
     /**
      * checks that the values are contained within the boundaries 0 and 1
      * @param x x coordinate
@@ -22,7 +24,7 @@ public record PointWebMercator(double x, double y) {
      * @return (x,y) dezoomed to 'level 0'
      */
     public static PointWebMercator of(int zoomLevel, double x, double y){
-        int zoomTotal = 8 + zoomLevel;
+        int zoomTotal = BASE_ZOOM + zoomLevel;
         return new PointWebMercator(Math.scalb(x, -zoomTotal), Math.scalb(y, -zoomTotal));
     }
 
@@ -41,7 +43,7 @@ public record PointWebMercator(double x, double y) {
      * @return Upscaled x coordinate
      */
     public double xAtZoomLevel(int zoomLevel){
-        return Math.scalb(x, 8 + zoomLevel);
+        return Math.scalb(x, BASE_ZOOM + zoomLevel);
     }
 
     /**
@@ -50,7 +52,7 @@ public record PointWebMercator(double x, double y) {
      * @return Upscaled y coordinate
      */
     public double yAtZoomLevel(int zoomLevel){
-        return Math.scalb(y, 8 + zoomLevel);
+        return Math.scalb(y, BASE_ZOOM + zoomLevel);
     }
 
     /**
