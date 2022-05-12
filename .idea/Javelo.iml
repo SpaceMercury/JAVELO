@@ -11,6 +11,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="junit.jupiter" level="project" />
     <orderEntry type="library" name="lib" level="project" />
-    <orderEntry type="library" name="JAVAFX" level="application" />
+    <orderEntry type="library" name="lib" level="application" />
   </component>
 </module>
