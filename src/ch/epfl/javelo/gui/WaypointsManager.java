@@ -2,7 +2,9 @@ package ch.epfl.javelo.gui;
 
 import ch.epfl.javelo.data.Graph;
 import ch.epfl.javelo.projection.PointWebMercator;
+import com.sun.javafx.geom.Point2D;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -65,6 +67,34 @@ public final class WaypointsManager {
 
             //correct positioning of the new marker
             pin.setLayoutX(myProperty.get().viewX(PointWebMercator.ofPointCh(waypoints.get(i).waypoint())));
+            pin.setLayoutY(myProperty.get().viewY(PointWebMercator.ofPointCh(waypoints.get(i).waypoint())));
+
+            //Managing of possible events
+            //1. Adding
+            pane.setOnMouseClicked(click -> { if(click.isStillSincePress()){
+                addWaypoint(click.getX(), click.getY());
+                waypoints.notifyAll();
+                setPins();
+            }
+            });
+
+            //2. Removing
+            int currentPinIndex = i;
+            pin.setOnMouseClicked(click -> { if(click.isStillSincePress()) {
+                waypoints.remove(currentPinIndex);
+                setPins();
+            }
+            });
+
+            //3. Moving
+            ObjectProperty<Point2D> movement = new SimpleObjectProperty<>();
+            pin.setOnMousePressed(hold -> { if(!hold.isStillSincePress()) {
+                movement.setValue(new Point2D(hold.getX(), hold.getY()));
+            }
+            });
+            pin.setOnMouseDragged(drag -> {
+                pin.setLayoutX(drag.getSceneX());
+            })
         }
     }
 }
