@@ -1,6 +1,7 @@
 package ch.epfl.javelo.gui;
 
 import ch.epfl.javelo.data.Graph;
+import ch.epfl.javelo.projection.PointCh;
 import ch.epfl.javelo.projection.PointWebMercator;
 import com.sun.javafx.geom.Point2D;
 import javafx.beans.property.ObjectProperty;
@@ -89,12 +90,20 @@ public final class WaypointsManager {
             //3. Moving
             ObjectProperty<Point2D> movement = new SimpleObjectProperty<>();
             pin.setOnMousePressed(hold -> { if(!hold.isStillSincePress()) {
-                movement.setValue(new Point2D(hold.getX(), hold.getY()));
+                movement.setValue(new Point2D((float) hold.getX(),(float) hold.getY()));
             }
             });
             pin.setOnMouseDragged(drag -> {
-                pin.setLayoutX(drag.getSceneX());
-            })
+                pin.setLayoutX(drag.getSceneX() - movement.get().x);
+                pin.setLayoutY(drag.getSceneY() - movement.get().y);
+            });
+
+            //TODO: check what this does specifically
+            pin.setOnMouseReleased(release -> { if(!release.isStillSincePress()) {
+                PointWebMercator point = myProperty.get().pointAt(release.getSceneX(),
+                        release.getSceneY());
+            }
+            });
         }
     }
 }
