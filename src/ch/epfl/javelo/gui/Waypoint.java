@@ -1,9 +1,6 @@
 package ch.epfl.javelo.gui;
 
 import ch.epfl.javelo.data.GraphNodes;
-import ch.epfl.javelo.projection.Ch1903;
+import ch.epfl.javelo.projection.PointCh;
 
-public record Waypoint(Ch1903 waypoint, int nodeId) {
-
-
-}
+public record Waypoint(PointCh waypoint, int nodeId) {}
