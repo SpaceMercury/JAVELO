@@ -4,7 +4,7 @@ import ch.epfl.javelo.projection.PointWebMercator;
 import javafx.geometry.Point2D;
 
 
-public record MapViewParameters(int zoom, int x, int y){
+public record MapViewParameters(int zoom, double x, double y){
 
 
     /**
@@ -22,7 +22,7 @@ public record MapViewParameters(int zoom, int x, int y){
      * @param yCoord the y coordinate relative to the to left corner
      * @return an instance of PointWebMercator
      */
-    public PointWebMercator pointAt(int xCoord, int yCoord){
+    public PointWebMercator pointAt(double xCoord, double yCoord){
         return PointWebMercator.of(zoom, x+xCoord, y+yCoord);
     }
 
