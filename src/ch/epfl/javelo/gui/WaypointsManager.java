@@ -6,6 +6,7 @@ import ch.epfl.javelo.projection.PointWebMercator;
 import com.sun.javafx.geom.Point2D;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -33,13 +34,19 @@ public final class WaypointsManager {
     }
 
     public Pane pane() {
-        return null;
+        return pane;
     }
     public void addWaypoint(double x, double y) {
-
+        PointWebMercator point = myProperty.get().pointAt(x, y);
+        PointCh current = point.toPointCh();
+        int currentNodeId = graph.nodeClosestTo(current, 500);
+        if(currentNodeId != -1) {
+            Waypoint newWaypoint = new Waypoint(current, currentNodeId);
+            waypoints.add(newWaypoint);
+        }
     }
 
-    private void setPins() {
+    private void makePins() {
         List<Node> pins = new ArrayList<>();
         pane.setPickOnBounds(false);
         for(int i = 0; i < pins.size(); i++) {
@@ -75,15 +82,15 @@ public final class WaypointsManager {
             pane.setOnMouseClicked(click -> { if(click.isStillSincePress()){
                 addWaypoint(click.getX(), click.getY());
                 waypoints.notifyAll();
-                setPins();
+                makePins();
             }
             });
 
             //2. Removing
-            int currentPinIndex = i;
+            int currentPinId = i;
             pin.setOnMouseClicked(click -> { if(click.isStillSincePress()) {
-                waypoints.remove(currentPinIndex);
-                setPins();
+                waypoints.remove(currentPinId);
+                makePins();
             }
             });
 
@@ -102,8 +109,25 @@ public final class WaypointsManager {
             pin.setOnMouseReleased(release -> { if(!release.isStillSincePress()) {
                 PointWebMercator point = myProperty.get().pointAt(release.getSceneX(),
                         release.getSceneY());
+                addWaypoint(point.x(), point.y());
+                PointCh current = point.toPointCh();
+                int currentNodeId = graph.nodeClosestTo(current, 500);
+                if(currentNodeId != -1) {
+                    Waypoint newWaypoint = new Waypoint(current, currentNodeId);
+                    waypoints.set(currentPinId, newWaypoint);
+                    makePins();
+                }
             }
             });
+
+            myProperty.addListener((myProperty -> makePins()));
+            myProperty.addListener((waypoints) ->
+                makePins());
+            waypoints.addListener((ListChangeListener<? super Waypoint>) change ->
+                makePins());
+            //TODO: check if this needs to be done twice or if it is the same thing
+            this.waypoints.addListener((ListChangeListener<? super Waypoint>) c ->
+                    makePins());
         }
     }
 }
