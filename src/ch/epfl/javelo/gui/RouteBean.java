@@ -8,7 +8,11 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.util.HashMap;
+
 public final class RouteBean{
+    private static final double MAX_DISTANCE = 5;
+    private static final int MAX_SIZE = 100;
     private final RouteComputer computer;
     private final ObservableList<Waypoint> waypoints;
     private final ObjectProperty<Route> route;
@@ -21,21 +25,69 @@ public final class RouteBean{
         this.route = new SimpleObjectProperty<>();
         this.highlightedPosition = new SimpleDoubleProperty(Double.NaN);
         this.elevationProfile = new SimpleObjectProperty<>();
+        updateListeners();
+    }
+
+
+    private void updateListeners() {
+        /**
+         * NodePair is a class/record that will facilitate the handling of
+         * nodes within the cache memory map created to win time
+         * in calculating the fastest way, taking the node ids
+         * as construction parameters.
+         */
+        record NodePair(int firstId, int secondId) {}
+        HashMap<NodePair, Route> routeCache = new HashMap<NodePair, Route>();
         waypoints.addListener((Observable o) -> {
 
         });
     }
 
+    //---------------------------------------------------------------------
+    //Bean classes for the waypoint list
+    //---------------------------------------------------------------------
 
-    public DoubleProperty highlightedPositionProperty() {
+    public ObservableList<Waypoint> getWaypoints() {
+        return this.waypoints;
+    }
+
+    //---------------------------------------------------------------------
+    //Bean classes for the route
+    //---------------------------------------------------------------------
+
+    public ReadOnlyObjectProperty<Route> getRouteProperty() {
+        return this.route;
+    }
+
+    public Route getRoute() {
+        return this.route.getValue();
+    }
+
+    //---------------------------------------------------------------------
+    //Bean classes for the highlighted position
+    //---------------------------------------------------------------------
+
+    public DoubleProperty getHighlightedPositionProperty() {
         return this.highlightedPosition;
     }
 
     public double getHighlightedPosition() {
-        return this.highlightedPosition.getValue();
+        return this.highlightedPosition.get();
     }
 
     public void setHighlightedPosition(double position) {
         this.highlightedPosition.setValue(position);
+    }
+
+    //---------------------------------------------------------------------
+    //Bean classes for the elevation profile
+    //---------------------------------------------------------------------
+
+    public ReadOnlyObjectProperty<ElevationProfile> getElevationProfileProperty() {
+        return this.elevationProfile;
+    }
+
+    public ElevationProfile getElevationProfile() {
+        return this.elevationProfile.getValue();
     }
 }
