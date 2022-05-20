@@ -3,6 +3,7 @@ package ch.epfl.javelo.gui;
 import ch.epfl.javelo.routing.ElevationProfile;
 import ch.epfl.javelo.routing.Route;
 import ch.epfl.javelo.routing.RouteComputer;
+import ch.epfl.javelo.routing.SingleRoute;
 import javafx.beans.Observable;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -28,7 +29,6 @@ public final class RouteBean{
         updateListeners();
     }
 
-
     private void updateListeners() {
         /**
          * NodePair is a class/record that will facilitate the handling of
@@ -39,6 +39,10 @@ public final class RouteBean{
         record NodePair(int firstId, int secondId) {}
         HashMap<NodePair, Route> routeCache = new HashMap<NodePair, Route>();
         waypoints.addListener((Observable o) -> {
+            if(waypoints.size() < 2) {
+                route.set(null);
+                elevationProfile.set(null);
+            }
 
         });
     }
