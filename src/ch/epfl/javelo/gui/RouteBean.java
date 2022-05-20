@@ -39,11 +39,17 @@ public final class RouteBean{
         record NodePair(int firstId, int secondId) {}
         HashMap<NodePair, Route> routeCache = new HashMap<NodePair, Route>();
         waypoints.addListener((Observable o) -> {
+            boolean nullProperty = false; //will become true if two waypoints cannot be connected or list is too short
             if(waypoints.size() < 2) {
-                route.set(null);
-                elevationProfile.set(null);
+                nullProperty = true;
             }
-
+            for (int i = 0; i < waypoints.size() - 1; i++) {
+                NodePair currentNodes = new NodePair(waypoints.get(i).nodeId(), waypoints.get(i + 1).nodeId());
+                Route currentBest = computer.bestRouteBetween(currentNodes.firstId, currentNodes.secondId);
+                if(currentBest == null) {
+                    nullProperty = true;
+                }
+            }
         });
     }
 
