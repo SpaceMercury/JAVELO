@@ -11,8 +11,10 @@ import javafx.collections.ObservableList;
 
 import java.util.HashMap;
 
+import static javafx.collections.FXCollections.observableArrayList;
+
 public final class RouteBean{
-    private static final double MAX_DISTANCE = 5;
+    private static final double MAX_DISTANCE = 5.0;
     private static final int MAX_SIZE = 100;
     private final RouteComputer computer;
     private final ObservableList<Waypoint> waypoints;
@@ -22,7 +24,7 @@ public final class RouteBean{
 
     public RouteBean(RouteComputer computer) {
         this.computer = computer;
-        this.waypoints = FXCollections.observableArrayList();
+        this.waypoints = observableArrayList();
         this.route = new SimpleObjectProperty<>();
         this.highlightedPosition = new SimpleDoubleProperty(Double.NaN);
         this.elevationProfile = new SimpleObjectProperty<>();
@@ -37,7 +39,7 @@ public final class RouteBean{
          * as construction parameters.
          */
         record NodePair(int firstId, int secondId) {}
-        HashMap<NodePair, Route> routeCache = new HashMap<NodePair, Route>();
+        HashMap<NodePair, Route> routeCache = new HashMap<>();
         waypoints.addListener((Observable o) -> {
             boolean nullProperty = false; //will become true if two waypoints cannot be connected or list is too short
             if(waypoints.size() < 2) {
@@ -45,10 +47,22 @@ public final class RouteBean{
             }
             for (int i = 0; i < waypoints.size() - 1; i++) {
                 NodePair currentNodes = new NodePair(waypoints.get(i).nodeId(), waypoints.get(i + 1).nodeId());
-                Route currentBest = computer.bestRouteBetween(currentNodes.firstId, currentNodes.secondId);
-                if(currentBest == null) {
+                Route best = new
+                if(routeCache.containsKey(currentNodes)) {
+                    best = routeCache.get(currentNodes);
+                } else {
+                    best = computer.bestRouteBetween(currentNodes.firstId, currentNodes.secondId);
+                }
+                if(best == null) {
                     nullProperty = true;
                 }
+                if(!routeCache.containsKey(currentNodes)) {
+                    routeCache.
+                }
+            }
+            if(nullProperty) {
+                route.set(null);
+                elevationProfile.set(null);
             }
         });
     }
