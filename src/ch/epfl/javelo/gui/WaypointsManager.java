@@ -31,6 +31,9 @@ public final class WaypointsManager {
         this.waypoints = waypoints;
         this.errorConsumer = errorConsumer;
         this.pane = new Pane();
+        makePins();
+        myProperty.addListener((o, oV, nV) -> makePins());
+        waypoints.addListener((ListChangeListener<? super Waypoint>) c -> makePins());
     }
 
     public Pane pane() {
@@ -43,6 +46,9 @@ public final class WaypointsManager {
         if(currentNodeId != -1) {
             Waypoint newWaypoint = new Waypoint(current, currentNodeId);
             waypoints.add(newWaypoint);
+        }
+        else {
+            errorConsumer.accept("Aucune route à proximité");
         }
     }
 
@@ -120,14 +126,9 @@ public final class WaypointsManager {
             }
             });
 
-            myProperty.addListener((myProperty -> makePins()));
             myProperty.addListener((waypoints) ->
                 makePins());
-            waypoints.addListener((ListChangeListener<? super Waypoint>) change ->
-                makePins());
-            //TODO: check if this needs to be done twice or if it is the same thing
-            this.waypoints.addListener((ListChangeListener<? super Waypoint>) c ->
-                    makePins());
         }
+        pane.getChildren().setAll(pins);
     }
 }
