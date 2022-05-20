@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public final class WaypointsManager {
+    private static final int SEARCH_RADIUS = 500;
     private final Graph graph;
     private final ObjectProperty<MapViewParameters> myProperty;
     private final ObservableList<Waypoint> waypoints;
@@ -117,7 +118,7 @@ public final class WaypointsManager {
                         release.getSceneY());
                 addWaypoint(point.x(), point.y());
                 PointCh current = point.toPointCh();
-                int currentNodeId = graph.nodeClosestTo(current, 500);
+                int currentNodeId = graph.nodeClosestTo(current, SEARCH_RADIUS);
                 if(currentNodeId != -1) {
                     Waypoint newWaypoint = new Waypoint(current, currentNodeId);
                     waypoints.set(currentPinId, newWaypoint);
