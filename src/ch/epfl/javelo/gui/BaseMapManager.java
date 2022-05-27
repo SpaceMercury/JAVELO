@@ -1,32 +1,37 @@
 package ch.epfl.javelo.gui;
 
 import ch.epfl.javelo.Math2;
+import com.sun.javafx.geom.Point2D;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public final class BaseMapManager {
 
-
-    private Canvas canvas;
-    private Pane pane;
+    private final Canvas canvas;
+    private final Pane pane;
     private boolean redrawNeeded;
-    private TileManager tileManager;
+    private final TileManager tileManager;
     private static int IMG_SIZE = 256;
-    private WaypointsManager waypointsManager;
-
-
-    ObjectProperty<MapViewParameters> mvParameters;
-    MapViewParameters mapView = mvParameters.getValue();
-
+    private final WaypointsManager waypointsManager;
+    private ObjectProperty<Point2D> point2DObjectProperty;
+    private final ObjectProperty<MapViewParameters> mvParameters;
+    private final MapViewParameters mapView;
 
     /**
      *
@@ -38,18 +43,31 @@ public final class BaseMapManager {
                           WaypointsManager waypointsManager,
                           ObjectProperty<MapViewParameters> mapViewParameters){
 
-        this.pane = new Pane();
         this.waypointsManager = waypointsManager;
-        canvas = new Canvas();
+        this.canvas = new Canvas();
+        this.pane = new Pane(canvas);
         this.tileManager = tileManager;
         mvParameters = mapViewParameters;
+        mapView = mvParameters.getValue();
+
         canvas.widthProperty().bind(pane.widthProperty());
         canvas.widthProperty().bind(pane.heightProperty());
+        //pane.getChildren().add(canvas);
+//        scrollZoom();
+//        moveCursor();
+//        clickToAddWaypoint();
+
 
         canvas.sceneProperty().addListener((p, oldS, newS) -> {
             assert oldS == null;
+            System.out.println("test1");
             newS.addPreLayoutPulseListener(this::redrawIfNeeded);
         });
+
+        redrawOnNextPulse();
+        mvParameters.addListener(observable -> redrawOnNextPulse());
+        canvas.widthProperty().addListener(observable -> redrawOnNextPulse());
+        canvas.heightProperty().addListener(observable -> redrawOnNextPulse());
 
     }
 
@@ -77,9 +95,10 @@ public final class BaseMapManager {
      */
     private void drawTilesOnCanvas() {
 
-
-        int xOffset = mapView.x() % IMG_SIZE;
-        int yOffset = mapView.y() % IMG_SIZE;
+        System.out.println("pane . " +pane.getHeight());
+        System.out.println("canvas . " +canvas.getHeight());
+        int xOffset = (int) (mapView.x() % IMG_SIZE);
+        int yOffset = (int) (mapView.y() % IMG_SIZE);
         boolean perfectX = xOffset == 0;
         boolean perfectY = yOffset == 0;
 
@@ -94,19 +113,19 @@ public final class BaseMapManager {
         for (int i = 0; i < lengthNum; i++) {
             for (int j = 0; j < heightNum; j++) {
 
-                int tileX = Math.floorDiv(mapView.x(),IMG_SIZE) + i;
-                int tileY = Math.floorDiv(mapView.y(),IMG_SIZE) + j;
+                int tileX = Math.floorDiv((int) mapView.x(), IMG_SIZE) + i;
+                int tileY = Math.floorDiv((int) mapView.y(), IMG_SIZE) + j;
                 Image tileImage = getTileImage(mapView, tileX, tileY);
 
                 double canvasX = perfectX
-                    ? IMG_SIZE * i
-                    : - (IMG_SIZE-yOffset) + IMG_SIZE * j;
+                        ? IMG_SIZE * i
+                        : -(IMG_SIZE - yOffset) + IMG_SIZE * j;
                 double canvasY = perfectY
                         ? IMG_SIZE * j
-                        : - (IMG_SIZE-yOffset) + IMG_SIZE * j;
-
+                        : -(IMG_SIZE - yOffset) + IMG_SIZE * j;
+                System.out.println(canvasX);
                 canvas.getGraphicsContext2D()
-                        .drawImage(tileImage,canvasX,canvasY);
+                        .drawImage(tileImage, 10, 10);
             }
         }
     }
@@ -128,14 +147,25 @@ public final class BaseMapManager {
     }
 
 
-
-    // @TODO need help for the event manager
-    private void scrollZoom(){
-        canvas.setOnScroll(scroll -> mvParameters.setValue(new MapViewParameters(
-                mapView.zoom() + (int) scroll.getDeltaY(),
-                mapView.x(), mapView.y())));
-    }
-
+//    private void scrollZoom(){
+//        pane.setOnScroll(scroll -> {
+//            int zoomLvl = Math2.clamp(8, mvParameters.getValue().zoom(), 19);
+//      /      mvParameters.set( zoomLvl, (int) scroll.getDeltaY(), mapView.x(), mapView.y()))
+//        });
+//    }
+//    private void moveCursor(){
+//        MouseEvent drag = new MouseEvent();
+//        pane.setOnMouseClicked(hold ->  {
+//            point2DObjectProperty.setValue(hold.getX() ,hold.getY()));
+//            drag.
+//        };
+//        while(drag.isStillSincePress()){
+//
+//        }
+//    }
+//    private void clickToAddWaypoint(){
+//        pane.setOnMouseClicked(click -> waypointsManager.addWaypopint( );
+//    }
 
     /**
      * Getter for the pane
@@ -143,9 +173,7 @@ public final class BaseMapManager {
      */
     public Pane pane(){
         return pane;
-
     }
-
 
 
 

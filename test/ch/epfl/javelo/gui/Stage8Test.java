@@ -7,20 +7,21 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
 
-//public final class Stage8Test extends Application {}
-    /**
+public final class Stage8Test extends Application {
+
     public static void main(String[] args) { launch(args); }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         Graph graph = Graph.loadFrom(Path.of("lausanne"));
-        Path cacheBasePath = Path.of(".");
+        Path cacheBasePath = Path.of("File");
         String tileServerHost = "tile.openstreetmap.org";
         TileManager tileManager =
                 new TileManager(cacheBasePath, tileServerHost);
@@ -61,4 +62,4 @@ import java.util.function.Consumer;
         public void accept(String s) { System.out.println(s); }
     }
 }
-**/
+

@@ -19,8 +19,6 @@ public final class TileManager {
     Path access;
     String serverName;
 
-
-
     public TileManager(Path access, String serverName)throws IOException{
         this.serverName = serverName;
         this.access = access;
@@ -31,21 +29,18 @@ public final class TileManager {
         if(cache.containsKey(id)){
             return cache.get(id);
         }
-        if(Files.exists(access)){
-            InputStream path = new FileInputStream(access.toFile());
+        Path xPath = access.resolve(Integer.valueOf(id.zoom).toString()).resolve(Integer.valueOf(id.X).toString());
+        Path finalPath = xPath.resolve(id.Y + ".png");
+
+        if(Files.exists(finalPath)){
+            InputStream path = new FileInputStream(finalPath.toFile());
             return new Image(path);
         }
-
-
-        storeImage(id);
-
-            Files.createDirectories(access);
-
-
+        storeImage(id, xPath, finalPath);
         return cache.get(id);
     }
 
-    private void storeImage(TileId id) throws IOException {
+    private void storeImage(TileId id, Path xPath, Path finalPath) throws IOException {
         String srcLink = "src/" + id.zoom + "/" + id.X + "/" + id.Y + ".png";
 
         URL u = new URL(
@@ -53,20 +48,14 @@ public final class TileManager {
         URLConnection c = u.openConnection();
         c.setRequestProperty("User-Agent", "JaVelo");
         try(InputStream i = c.getInputStream()){
-            OutputStream os = new FileOutputStream(String.valueOf(access));
+            OutputStream os = new FileOutputStream(Files.createDirectories(xPath).resolve(id.Y + ".png").toFile());
             i.transferTo(os);
+        }
+        try(InputStream i = new FileInputStream(finalPath.toFile())){
             Image streamImage = new Image(i);
             cache.put(id, streamImage);
-            os.close();
         }
-
-
     }
-
-    private boolean isCacheMax(){
-        return (cache.size() == 100);
-    }
-
 
      public record TileId(int zoom, int X, int Y){
 
