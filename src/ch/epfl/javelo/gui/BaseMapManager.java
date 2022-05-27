@@ -1,24 +1,21 @@
 package ch.epfl.javelo.gui;
 
 import ch.epfl.javelo.Math2;
-import com.sun.javafx.geom.Point2D;
+import ch.epfl.javelo.projection.PointWebMercator;
+
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.event.EventHandler;
-import javafx.scene.Scene;
+
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.awt.*;
+import java.awt.geom.Point2D;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+
 
 
 public final class BaseMapManager {
@@ -29,9 +26,8 @@ public final class BaseMapManager {
     private final TileManager tileManager;
     private static int IMG_SIZE = 256;
     private final WaypointsManager waypointsManager;
-    private ObjectProperty<Point2D> point2DObjectProperty;
+    private Point2D mousePoint2D;
     private final ObjectProperty<MapViewParameters> mvParameters;
-    private final MapViewParameters mapView;
 
     /**
      *
@@ -48,26 +44,30 @@ public final class BaseMapManager {
         this.pane = new Pane(canvas);
         this.tileManager = tileManager;
         mvParameters = mapViewParameters;
-        mapView = mvParameters.getValue();
-
         canvas.widthProperty().bind(pane.widthProperty());
-        canvas.widthProperty().bind(pane.heightProperty());
-        //pane.getChildren().add(canvas);
-//        scrollZoom();
-//        moveCursor();
-//        clickToAddWaypoint();
+        canvas.heightProperty().bind(pane.heightProperty());
+
+        //Initialise the mouse at 0, 0
+        mousePoint2D = new Point2D.Double(0,0);
+
+        scrollZoom();
+        moveCursor();
+        clickToAddWaypoint();
+
+
+        redrawOnNextPulse();
 
 
         canvas.sceneProperty().addListener((p, oldS, newS) -> {
             assert oldS == null;
-            System.out.println("test1");
             newS.addPreLayoutPulseListener(this::redrawIfNeeded);
         });
 
-        redrawOnNextPulse();
-        mvParameters.addListener(observable -> redrawOnNextPulse());
-        canvas.widthProperty().addListener(observable -> redrawOnNextPulse());
-        canvas.heightProperty().addListener(observable -> redrawOnNextPulse());
+        //mvParameters.addListener(observable -> redrawOnNextPulse());
+        //canvas.widthProperty().addListener(observable -> redrawOnNextPulse());
+        //canvas.heightProperty().addListener(observable -> redrawOnNextPulse());
+
+
 
     }
 
@@ -95,10 +95,8 @@ public final class BaseMapManager {
      */
     private void drawTilesOnCanvas() {
 
-        System.out.println("pane . " +pane.getHeight());
-        System.out.println("canvas . " +canvas.getHeight());
-        int xOffset = (int) (mapView.x() % IMG_SIZE);
-        int yOffset = (int) (mapView.y() % IMG_SIZE);
+        int xOffset = (int) (mvParameters.getValue().x() % IMG_SIZE);
+        int yOffset = (int) (mvParameters.getValue().y() % IMG_SIZE);
         boolean perfectX = xOffset == 0;
         boolean perfectY = yOffset == 0;
 
@@ -113,19 +111,18 @@ public final class BaseMapManager {
         for (int i = 0; i < lengthNum; i++) {
             for (int j = 0; j < heightNum; j++) {
 
-                int tileX = Math.floorDiv((int) mapView.x(), IMG_SIZE) + i;
-                int tileY = Math.floorDiv((int) mapView.y(), IMG_SIZE) + j;
-                Image tileImage = getTileImage(mapView, tileX, tileY);
+                int tileX = Math.floorDiv((int) mvParameters.getValue().x(), IMG_SIZE) + i;
+                int tileY = Math.floorDiv((int) mvParameters.getValue().y(), IMG_SIZE) + j;
+                Image tileImage = getTileImage(mvParameters.getValue(), tileX, tileY);
 
                 double canvasX = perfectX
                         ? IMG_SIZE * i
-                        : -(IMG_SIZE - yOffset) + IMG_SIZE * j;
+                        : -(IMG_SIZE - xOffset) + IMG_SIZE * i;
                 double canvasY = perfectY
                         ? IMG_SIZE * j
                         : -(IMG_SIZE - yOffset) + IMG_SIZE * j;
-                System.out.println(canvasX);
                 canvas.getGraphicsContext2D()
-                        .drawImage(tileImage, 10, 10);
+                        .drawImage(tileImage, canvasX, canvasY);
             }
         }
     }
@@ -146,14 +143,19 @@ public final class BaseMapManager {
         return tileImage;
     }
 
+    private void setMouseScroll(ScrollEvent s){
+        mousePoint2D.setLocation(s.getX(), s.getY());
+    }
 
-//    private void scrollZoom(){
-//        pane.setOnScroll(scroll -> {
-//            int zoomLvl = Math2.clamp(8, mvParameters.getValue().zoom(), 19);
-//      /      mvParameters.set( zoomLvl, (int) scroll.getDeltaY(), mapView.x(), mapView.y()))
-//        });
-//    }
-//    private void moveCursor(){
+    private void scrollZoom(){
+        pane.setOnScroll(scroll -> {
+            setMouseScroll(scroll);
+            PointWebMercator p = mvParameters.getValue().pointAt(mousePoint2D.getX(), mousePoint2D.getY());
+            int zoomLvl = Math2.clamp(8, mvParameters.getValue().zoom(), 19);
+            mvParameters.setValue(new MapViewParameters(zoomLvl, p.xAtZoomLevel(zoomLvl), p.yAtZoomLevel(zoomLvl)));
+        });
+    }
+    private void moveCursor(){
 //        MouseEvent drag = new MouseEvent();
 //        pane.setOnMouseClicked(hold ->  {
 //            point2DObjectProperty.setValue(hold.getX() ,hold.getY()));
@@ -162,10 +164,12 @@ public final class BaseMapManager {
 //        while(drag.isStillSincePress()){
 //
 //        }
-//    }
-//    private void clickToAddWaypoint(){
-//        pane.setOnMouseClicked(click -> waypointsManager.addWaypopint( );
-//    }
+    }
+
+    private void clickToAddWaypoint(){
+        pane.setOnMouseClicked(click -> waypointsManager.addWaypoint(mousePoint2D.getX(), mousePoint2D.getY()));
+        System.out.println("click" + mousePoint2D.getX() + " ffff "+ mousePoint2D.getY());
+    }
 
     /**
      * Getter for the pane
@@ -174,7 +178,4 @@ public final class BaseMapManager {
     public Pane pane(){
         return pane;
     }
-
-
-
 }
