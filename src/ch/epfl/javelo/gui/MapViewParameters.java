@@ -12,8 +12,17 @@ public record MapViewParameters(int zoom, double x, double y){
      * @return a Point2D, the type used by java to represent points
      */
     public Point2D topLeftPixel(){
-        PointWebMercator webMc = PointWebMercator.of(zoom, x, y);
-        return new Point2D(webMc.x(), webMc.y());
+        return new Point2D(x,y);
+    }
+
+    /**
+     *
+     * @param x
+     * @param y
+     * @return
+     */
+    public MapViewParameters withMinXY(double x, double y){
+        return new MapViewParameters(zoom,x,y);
     }
 
     /**
@@ -23,7 +32,7 @@ public record MapViewParameters(int zoom, double x, double y){
      * @return an instance of PointWebMercator
      */
     public PointWebMercator pointAt(double xCoord, double yCoord){
-        return PointWebMercator.of(zoom, x+xCoord, y+yCoord);
+        return PointWebMercator.of(zoom, x, y);
     }
 
     /**
@@ -32,7 +41,7 @@ public record MapViewParameters(int zoom, double x, double y){
      * @return position x relative to the upper left corner of the portion of the map shown on screen
      */
     public double viewX(PointWebMercator point){
-        return x-point.x();
+        return point.xAtZoomLevel(zoom)-x;
     }
 
     /**
@@ -41,7 +50,7 @@ public record MapViewParameters(int zoom, double x, double y){
      * @return position y relative to the upper left corner of the portion of the map shown on screen
      */
     public double viewY(PointWebMercator point){
-        return y-point.y();
+        return point.xAtZoomLevel(zoom)-y;
     }
 
 
