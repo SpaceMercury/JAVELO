@@ -3,7 +3,9 @@ package ch.epfl.javelo.gui;
 import ch.epfl.javelo.projection.PointWebMercator;
 import javafx.geometry.Point2D;
 
-
+/**
+ * @author fuentes
+ */
 public record MapViewParameters(int zoom, double x, double y){
 
 
