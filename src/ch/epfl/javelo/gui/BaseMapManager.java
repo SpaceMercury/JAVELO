@@ -19,7 +19,9 @@ import javafx.scene.layout.Pane;
 import java.io.IOException;
 
 
-
+/**
+ * @author fuentes
+ */
 public final class BaseMapManager {
 
     private final Canvas canvas;
@@ -34,10 +36,10 @@ public final class BaseMapManager {
     private final ObjectProperty<MapViewParameters> mvParameters;
 
     /**
-     *
-     * @param tileManager
-     * @param waypointsManager
-     * @param mapViewParameters
+     * Public BaseMapManager constructor
+     * @param tileManager the TileManager
+     * @param waypointsManager the WaypointsManager
+     * @param mapViewParameters An ObjectProperty of MapViewParameters
      */
     public BaseMapManager(TileManager tileManager,
                           WaypointsManager waypointsManager,
@@ -48,16 +50,16 @@ public final class BaseMapManager {
         this.pane = new Pane(canvas);
         this.tileManager = tileManager;
         mvParameters = mapViewParameters;
+        //bind canvas to the pane
         canvas.widthProperty().bind(pane.widthProperty());
         canvas.heightProperty().bind(pane.heightProperty());
 
         pane.setPrefSize(IMG_SIZE,IMG_SIZE);
-        //Initialise the mouse at 0, 0
-        //mousePoint2D = new Point2D.Double(0,0);
 
+        //Events
         scrollZoom();
         moveCursor();
-        //clickToAddWaypoint();
+        clickToAddWaypoint();
 
         redrawOnNextPulse();
         canvas.sceneProperty().addListener((p, oldS, newS) -> {
@@ -69,12 +71,11 @@ public final class BaseMapManager {
         //canvas.widthProperty().addListener(observable -> redrawOnNextPulse());
         //canvas.heightProperty().addListener(observable -> redrawOnNextPulse());
 
-
-
     }
 
     /**
-     *
+     * Method to set redrawNeeded to true and to delay the drawing process
+     * So that it doesn't redraw more than 60 times per second
      */
     private void redrawOnNextPulse() {
         redrawNeeded = true;
@@ -82,7 +83,7 @@ public final class BaseMapManager {
     }
 
     /**
-     *
+     * Calls drawTilesOnCanvas which will draw the tiles
      */
     private void redrawIfNeeded() {
         if (!redrawNeeded) return;
@@ -93,23 +94,25 @@ public final class BaseMapManager {
 
 
     /**
-     * Draws the Tiles all of the tiles on the canvas
+     * Draws the Tiles on the canvas
      */
     private void drawTilesOnCanvas() {
 
+        //Offset for the tiles on canvas
         int xOffset = (int) Math.floor(mvParameters.getValue().x() % IMG_SIZE);
         int yOffset = (int) Math.floor(mvParameters.getValue().y() % IMG_SIZE);
-        boolean perfectX = xOffset == 0;
-        boolean perfectY = yOffset == 0;
 
+        //calculate how many tiles fit lengthwise
         int lengthNum = xOffset == 0
              ? Math2.ceilDiv((int) canvas.getWidth(), IMG_SIZE)
              : Math2.ceilDiv((int) canvas.getWidth(), IMG_SIZE) + 1;
 
+        //calculate how many tiles fit heightwise
         int heightNum = yOffset == 0
                 ? Math2.ceilDiv((int) canvas.getHeight(), IMG_SIZE)
                 : Math2.ceilDiv((int) canvas.getHeight(), IMG_SIZE) + 1;
 
+        //Loop to draw the tiles
         for (int i = 0; i < lengthNum; i++) {
             for (int j = 0; j < heightNum; j++) {
 
@@ -140,6 +143,9 @@ public final class BaseMapManager {
     }
 
 
+    /**
+     * Event manager for zoom
+     */
     private void scrollZoom(){
         canvas.setOnScroll(scroll -> {
             PointWebMercator p = PointWebMercator.of(mvParameters.getValue().zoom(),
@@ -147,10 +153,14 @@ public final class BaseMapManager {
                     mvParameters.getValue().y() + scroll.getY());
 
             int zoomLvl = Math2.clamp(MIN_ZOOM, mvParameters.get().zoom() + (int)Math.signum(scroll.getDeltaY()), MAX_ZOOM);
-            System.out.println(p.xAtZoomLevel(zoomLvl)-scroll.getX());
             mvParameters.set(new MapViewParameters(zoomLvl, p.xAtZoomLevel(zoomLvl)-scroll.getX(), p.yAtZoomLevel(zoomLvl) - scroll.getY()));
         });
     }
+
+    
+    /**
+     * Event manager for moving the by dragging
+     */
     private void moveCursor(){
 
         mousePoint2D = new SimpleObjectProperty<>();
@@ -159,18 +169,20 @@ public final class BaseMapManager {
         });
 
         pane.setOnMouseDragged(hold ->  {
-            MapViewParameters feur = mvParameters.getValue();
+            MapViewParameters mValue = mvParameters.getValue();
             Point2D currentPoint = new Point2D(hold.getSceneX(), hold.getSceneY());
-            mvParameters.setValue(feur.withMinXY( feur.x() + mousePoint2D.getValue().getX() - currentPoint.getX(),
-                            feur.y() + mousePoint2D.getValue().getY() - currentPoint.getY()));
+            mvParameters.setValue(mValue.withMinXY( mValue.x() + mousePoint2D.getValue().getX() - currentPoint.getX(),
+                            mValue.y() + mousePoint2D.getValue().getY() - currentPoint.getY()));
             mousePoint2D.setValue(currentPoint);
 
         });
 
     }
 
+    /**
+     * Event manager for adding Waypoints
+     */
     private void clickToAddWaypoint(){
-
         pane.setOnMouseClicked(click ->{
             Point2D currentPoint = new Point2D(click.getX(), click.getY());
             waypointsManager.addWaypoint(mousePoint2D.getValue().getX(), mousePoint2D.getValue().getY());
