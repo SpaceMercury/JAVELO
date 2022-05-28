@@ -47,7 +47,7 @@ public final class RouteBean{
             }
             for (int i = 0; i < waypoints.size() - 1; i++) {
                 NodePair currentNodes = new NodePair(waypoints.get(i).nodeId(), waypoints.get(i + 1).nodeId());
-                Route best = new
+                Route best = null;
                 if(routeCache.containsKey(currentNodes)) {
                     best = routeCache.get(currentNodes);
                 } else {
@@ -57,7 +57,7 @@ public final class RouteBean{
                     nullProperty = true;
                 }
                 if(!routeCache.containsKey(currentNodes)) {
-                    routeCache.
+                    //routeCache.
                 }
             }
             if(nullProperty) {

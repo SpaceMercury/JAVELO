@@ -3,11 +3,11 @@ package ch.epfl.javelo.gui;
 import ch.epfl.javelo.data.Graph;
 import ch.epfl.javelo.projection.PointCh;
 import ch.epfl.javelo.projection.PointWebMercator;
-import com.sun.javafx.geom.Point2D;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
@@ -56,8 +56,7 @@ public final class WaypointsManager {
     private void makePins() {
         List<Node> pins = new ArrayList<>();
         pane.setPickOnBounds(false);
-        for(int i = 0; i < pins.size(); i++) {
-
+        for(int i = 0; i < waypoints.size(); i++) {
             //creation of a new pin
             SVGPath pathExt = new SVGPath();
             SVGPath pathInt = new SVGPath();
@@ -80,55 +79,46 @@ public final class WaypointsManager {
                 pin.getStyleClass().add("middle");
             }
 
-            //correct positioning of the new marker
+            //Correct positioning of the new marker
             pin.setLayoutX(myProperty.get().viewX(PointWebMercator.ofPointCh(waypoints.get(i).waypoint())));
             pin.setLayoutY(myProperty.get().viewY(PointWebMercator.ofPointCh(waypoints.get(i).waypoint())));
 
-            //Managing of possible events
-            //1. Adding
-            pane.setOnMouseClicked(click -> { if(click.isStillSincePress()){
-                addWaypoint(click.getX(), click.getY());
-                waypoints.notifyAll();
-                makePins();
-            }
-            });
-
-            //2. Removing
             int currentPinId = i;
-            pin.setOnMouseClicked(click -> { if(click.isStillSincePress()) {
+            //Deleting a waypoint
+            pin.setOnMouseClicked(e -> {if(e.isStillSincePress()) {
                 waypoints.remove(currentPinId);
                 makePins();
             }
             });
 
-            //3. Moving
-            ObjectProperty<Point2D> movement = new SimpleObjectProperty<>();
-            pin.setOnMousePressed(hold -> { if(!hold.isStillSincePress()) {
-                movement.setValue(new Point2D((float) hold.getX(),(float) hold.getY()));
+            //Saving the displacement of a waypoint while it is being moved
+            ObjectProperty<Point2D> displacement = new SimpleObjectProperty<>();
+            pin.setOnMousePressed(e -> {if(!e.isStillSincePress()) {
+                displacement.set(new Point2D(e.getX(), e.getY()));
             }
             });
-            pin.setOnMouseDragged(drag -> {
-                pin.setLayoutX(drag.getSceneX() - movement.get().x);
-                pin.setLayoutY(drag.getSceneY() - movement.get().y);
+
+            //Setting the new value of the coordinates of the waypoint
+            pin.setOnMouseDragged(e -> {
+                pin.setLayoutX(e.getSceneX() - displacement.get().getX());
+                pin.setLayoutY(e.getSceneY() - displacement.get().getY());
             });
 
-            //TODO: check what this does specifically
-            pin.setOnMouseReleased(release -> { if(!release.isStillSincePress()) {
-                PointWebMercator point = myProperty.get().pointAt(release.getSceneX(),
-                        release.getSceneY());
-                addWaypoint(point.x(), point.y());
-                PointCh current = point.toPointCh();
-                int currentNodeId = graph.nodeClosestTo(current, SEARCH_RADIUS);
-                if(currentNodeId != -1) {
-                    Waypoint newWaypoint = new Waypoint(current, currentNodeId);
-                    waypoints.set(currentPinId, newWaypoint);
+            //Replacing the old waypoint with the new one in the list
+            pin.setOnMouseReleased(e -> {if(!e.isStillSincePress()) {
+                PointWebMercator point = myProperty.get().pointAt(e.getSceneX(), e.getSceneY());
+                PointCh other = point.toPointCh();
+                int currentNode = graph.nodeClosestTo(other, SEARCH_RADIUS);
+                if(currentNode != -1) {
+                    Waypoint waypoint = new Waypoint(other, currentNode);
+                    waypoints.set(currentPinId, waypoint);
                     makePins();
+                } else {
+                    errorConsumer.accept("Aucune route à proximité");
                 }
             }
             });
-
-            myProperty.addListener((waypoints) ->
-                makePins());
+            myProperty.addListener((waypoints) -> makePins());
         }
         pane.getChildren().setAll(pins);
     }
