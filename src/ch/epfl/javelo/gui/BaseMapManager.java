@@ -2,20 +2,13 @@ package ch.epfl.javelo.gui;
 
 import ch.epfl.javelo.Math2;
 import ch.epfl.javelo.projection.PointWebMercator;
-
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
-
-import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
-
-
 import java.io.IOException;
 
 

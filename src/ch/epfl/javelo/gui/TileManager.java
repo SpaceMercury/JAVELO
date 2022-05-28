@@ -2,8 +2,6 @@ package ch.epfl.javelo.gui;
 
 import ch.epfl.javelo.Preconditions;
 import javafx.scene.image.Image;
-
-
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
