@@ -68,7 +68,7 @@ public final class RouteBean{
     }
 
     //---------------------------------------------------------------------
-    //Bean classes for the waypoint list
+    //Bean classes for the point list
     //---------------------------------------------------------------------
 
     public ObservableList<Waypoint> getWaypoints() {

@@ -12,50 +12,93 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.SVGPath;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * @author ventura
+ */
 public final class WaypointsManager {
+    //Constants used in the class
+    private static final String GREEN = "first";
+    private static final String BLUE = "middle";
+    private static final String RED = "last";
+    private static final String PIN = "pin";
+    private static final String OUT = "pin_outside";
+    private static final String IN = "pin_inside";
+    private static final String OUT_DESIGN = "M-8-20C-5-14-2-7 0 0 2-7 5-14 8-20 20-40-20-40-8-20";
+    private static final String IN_DESIGN = "M0-23A1 1 0 000-29 1 1 0 000-23";
+    private static final String ERROR = "Aucune route à proximité !";
     private static final int SEARCH_RADIUS = 500;
+    //Attributes of the class
     private final Graph graph;
-    private final ObjectProperty<MapViewParameters> myProperty;
+    private final ObjectProperty<MapViewParameters> property;
     private final ObservableList<Waypoint> waypoints;
     private final Consumer<String> errorConsumer;
     private final Pane pane;
 
-    public WaypointsManager(Graph graph, ObjectProperty<MapViewParameters> myProperty,
+    /**
+     * Constructor of the WaypointsManager class
+     * @param graph the graph of Manager
+     * @param property the object property on the mapview
+     * @param waypoints the observable list of waypoints
+     * @param errorConsumer the error consumer
+     */
+    public WaypointsManager(Graph graph, ObjectProperty<MapViewParameters> property,
                             ObservableList<Waypoint> waypoints, Consumer<String> errorConsumer) {
         this.graph = graph;
-        this.myProperty = myProperty;
+        this.property = property;
         this.waypoints = waypoints;
         this.errorConsumer = errorConsumer;
         this.pane = new Pane();
-        makePins();
-        myProperty.addListener((o, oV, nV) -> makePins());
+        this.pane.setPickOnBounds(false);
+        property.addListener((o, oV, nV) -> makePins());
         waypoints.addListener((ListChangeListener<? super Waypoint>) c -> makePins());
     }
 
+    /**
+     * Method that returns the pane
+     * @return the pane that contains the waypoints
+     */
     public Pane pane() {
         return pane;
     }
+
+    /**
+     * Method that adds a new point from a selected point (providing it is possible)
+     * @param x x-coord of the selected point
+     * @param y y-coord of the selected point
+     */
     public void addWaypoint(double x, double y) {
-        PointWebMercator point = myProperty.get().pointAt(x, y);
-        PointCh current = point.toPointCh();
-        int currentNodeId = graph.nodeClosestTo(current, 500);
-        if(currentNodeId != -1) {
-            Waypoint newWaypoint = new Waypoint(current, currentNodeId);
-            waypoints.add(newWaypoint);
+        PointWebMercator pointWM = property.get().pointAt(x, y);
+        PointCh point = pointWM.toPointCh();
+        Waypoint waypoint = newWaypoint(point);
+        if(!(waypoint == null) && !(waypoints.contains(waypoint))) {
+            waypoints.add(waypoint);
         }
-        else {
-            errorConsumer.accept("Aucune route à proximité");
+    }
+
+    /**
+     * Method that will turn a PointCh into a point (if it is possible)
+     * @param point the PointCh that is to be turned into a point
+     * @return a new point, or null if it could not be made
+     */
+    private Waypoint newWaypoint(PointCh point) {
+        if(point == null) {
+            errorConsumer.accept(ERROR);
+            return null;
         }
+        int nodeId = graph.nodeClosestTo(point, SEARCH_RADIUS);
+        if(nodeId == -1) {
+            errorConsumer.accept(ERROR);
+            return null;
+        }
+        return new Waypoint(point, nodeId);
     }
 
     private void makePins() {
         List<Node> pins = new ArrayList<>();
-        pane.setPickOnBounds(false);
         for(int i = 0; i < waypoints.size(); i++) {
             //creation of a new pin
             SVGPath pathExt = new SVGPath();
@@ -80,33 +123,33 @@ public final class WaypointsManager {
             }
 
             //Correct positioning of the new marker
-            pin.setLayoutX(myProperty.get().viewX(PointWebMercator.ofPointCh(waypoints.get(i).waypoint())));
-            pin.setLayoutY(myProperty.get().viewY(PointWebMercator.ofPointCh(waypoints.get(i).waypoint())));
+            pin.setLayoutX(property.get().viewX(PointWebMercator.ofPointCh(waypoints.get(i).point())));
+            pin.setLayoutY(property.get().viewY(PointWebMercator.ofPointCh(waypoints.get(i).point())));
 
             int currentPinId = i;
-            //Deleting a waypoint
+            //Deleting a point
             pin.setOnMouseClicked(e -> {if(e.isStillSincePress()) {
                 waypoints.remove(currentPinId);
                 makePins();
             }
             });
 
-            //Saving the displacement of a waypoint while it is being moved
+            //Saving the displacement of a point while it is being moved
             ObjectProperty<Point2D> displacement = new SimpleObjectProperty<>();
             pin.setOnMousePressed(e -> {if(!e.isStillSincePress()) {
                 displacement.set(new Point2D(e.getX(), e.getY()));
             }
             });
 
-            //Setting the new value of the coordinates of the waypoint
+            //Setting the new value of the coordinates of the point
             pin.setOnMouseDragged(e -> {
                 pin.setLayoutX(e.getSceneX() - displacement.get().getX());
                 pin.setLayoutY(e.getSceneY() - displacement.get().getY());
             });
 
-            //Replacing the old waypoint with the new one in the list
+            //Replacing the old point with the new one in the list
             pin.setOnMouseReleased(e -> {if(!e.isStillSincePress()) {
-                PointWebMercator point = myProperty.get().pointAt(e.getSceneX(), e.getSceneY());
+                PointWebMercator point = property.get().pointAt(e.getSceneX(), e.getSceneY());
                 PointCh other = point.toPointCh();
                 int currentNode = graph.nodeClosestTo(other, SEARCH_RADIUS);
                 if(currentNode != -1) {
@@ -118,7 +161,7 @@ public final class WaypointsManager {
                 }
             }
             });
-            myProperty.addListener((waypoints) -> makePins());
+            property.addListener((waypoints) -> makePins());
         }
         pane.getChildren().setAll(pins);
     }
