@@ -56,7 +56,6 @@ public final class WaypointsManager {
         this.pane.setPickOnBounds(false);
         property.addListener((o, oV, nV) -> makePins());
         waypoints.addListener((ListChangeListener<? super Waypoint>) c -> makePins());
-        makePins();
     }
 
     /**
@@ -73,12 +72,17 @@ public final class WaypointsManager {
      * @param y y-coord of the selected point
      */
     public void addWaypoint(double x, double y) {
+        System.out.println("Waypoint is called");
         PointWebMercator pointWM = property.get().pointAt(x, y);
         PointCh point = pointWM.toPointCh();
         Waypoint waypoint = newWaypoint(point);
-        if(!(waypoint == null) && !(waypoints.contains(waypoint))) {
-            waypoints.add(waypoint);
+        if(!(waypoint == null)) {
+            if (!(waypoints.contains(waypoint))) {
+                System.out.println("waypoint is added");
+                waypoints.add(waypoint);
+            }
         }
+        makePins();
     }
 
     /**
@@ -87,6 +91,7 @@ public final class WaypointsManager {
      * @return a new point, or null if it could not be made
      */
     private Waypoint newWaypoint(PointCh point) {
+        System.out.println("new waypoint is called");
         if(point == null) {
             errorConsumer.accept(ERROR);
             return null;
@@ -103,8 +108,11 @@ public final class WaypointsManager {
      * Method that will create all the pins for the waypoints
      */
     private void makePins() {
-        List<Node> pins = new ArrayList<>();
+        System.out.println("makepins is activated");
+        List<Group> pins = new ArrayList<>();
         for(int i = 0; i < waypoints.size(); i++) {
+            System.out.println(i);
+            System.out.println(pins.size());
             //creation of a new pin
             SVGPath ext = new SVGPath();
             SVGPath in = new SVGPath();
@@ -134,6 +142,7 @@ public final class WaypointsManager {
             int currentPinId = i;
             //Deleting a point
             pin.setOnMouseClicked(e -> {if(e.isStillSincePress()) {
+                System.out.println("remove is activated");
                 waypoints.remove(currentPinId);
             }
             });
@@ -154,13 +163,11 @@ public final class WaypointsManager {
                 Waypoint waypoint = newWaypoint(other);
                 if(waypoint != null && !(waypoints.contains(waypoint))) {
                     waypoints.set(currentPinId, waypoint);
-                } else {
-                    makePins();
+
                 }
             }
             });
-            property.addListener((waypoints) -> makePins());
+            pane.getChildren().add(pin);
         }
-        pane.getChildren().setAll(pins);
     }
 }
