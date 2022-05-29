@@ -56,6 +56,7 @@ public final class WaypointsManager {
         this.pane.setPickOnBounds(false);
         property.addListener((o, oV, nV) -> makePins());
         waypoints.addListener((ListChangeListener<? super Waypoint>) c -> makePins());
+        makePins();
     }
 
     /**
