@@ -37,6 +37,7 @@ public final class WaypointsManager {
     private final ObservableList<Waypoint> waypoints;
     private final Consumer<String> errorConsumer;
     private final Pane pane;
+    private Point2D mouseLocation;
 
     /**
      * Constructor of the WaypointsManager class
@@ -97,30 +98,33 @@ public final class WaypointsManager {
         return new Waypoint(point, nodeId);
     }
 
+    /**
+     * Method that will create all the pins for the waypoints
+     */
     private void makePins() {
         List<Node> pins = new ArrayList<>();
         for(int i = 0; i < waypoints.size(); i++) {
             //creation of a new pin
-            SVGPath pathExt = new SVGPath();
-            SVGPath pathInt = new SVGPath();
-            pathExt.setContent("M-8-20C-5-14-2-7 0 0 2-7 5-14 8-20 20-40-20-40-8-20");
-            pathExt.getStyleClass().add("pin_outside");
-            pathInt.setContent("M0-23A1 1 0 000-29 1 1 0 000-23");
-            pathInt.getStyleClass().add("pin_inside");
-            Group pin = new Group(pathExt, pathInt);
-            pin.getStyleClass().add("pin");
-
-            //pin gets added to the list
-            pins.add(pin);
+            SVGPath ext = new SVGPath();
+            SVGPath in = new SVGPath();
+            ext.setContent(OUT_DESIGN);
+            ext.getStyleClass().add(OUT);
+            in.setContent(IN_DESIGN);
+            in.getStyleClass().add(IN);
+            Group pin = new Group(ext, in);
+            pin.getStyleClass().add(PIN);
 
             //check which pin it is(first, last, or just in the middle)
             if(i == 0) {
-                pin.getStyleClass().add("first");
-            } else if(i == pins.size() - 1) {
-                pin.getStyleClass().add("last");
+                pin.getStyleClass().add(GREEN);
+            } else if(i == waypoints.size() - 1) {
+                pin.getStyleClass().add(RED);
             } else {
-                pin.getStyleClass().add("middle");
+                pin.getStyleClass().add(BLUE);
             }
+
+            //pin gets added to the list
+            pins.add(pin);
 
             //Correct positioning of the new marker
             pin.setLayoutX(property.get().viewX(PointWebMercator.ofPointCh(waypoints.get(i).point())));
@@ -130,34 +134,27 @@ public final class WaypointsManager {
             //Deleting a point
             pin.setOnMouseClicked(e -> {if(e.isStillSincePress()) {
                 waypoints.remove(currentPinId);
-                makePins();
             }
             });
 
             //Saving the displacement of a point while it is being moved
-            ObjectProperty<Point2D> displacement = new SimpleObjectProperty<>();
-            pin.setOnMousePressed(e -> {if(!e.isStillSincePress()) {
-                displacement.set(new Point2D(e.getX(), e.getY()));
-            }
-            });
+            pin.setOnMousePressed(e -> mouseLocation = new Point2D(e.getX(), e.getY()));
 
             //Setting the new value of the coordinates of the point
             pin.setOnMouseDragged(e -> {
-                pin.setLayoutX(e.getSceneX() - displacement.get().getX());
-                pin.setLayoutY(e.getSceneY() - displacement.get().getY());
+                pin.setLayoutX(pin.getLayoutX() + e.getX() - mouseLocation.getX());
+                pin.setLayoutY(pin.getLayoutY() + e.getY() - mouseLocation.getY());
             });
 
             //Replacing the old point with the new one in the list
             pin.setOnMouseReleased(e -> {if(!e.isStillSincePress()) {
                 PointWebMercator point = property.get().pointAt(e.getSceneX(), e.getSceneY());
                 PointCh other = point.toPointCh();
-                int currentNode = graph.nodeClosestTo(other, SEARCH_RADIUS);
-                if(currentNode != -1) {
-                    Waypoint waypoint = new Waypoint(other, currentNode);
+                Waypoint waypoint = newWaypoint(other);
+                if(waypoint != null && !(waypoints.contains(waypoint))) {
                     waypoints.set(currentPinId, waypoint);
-                    makePins();
                 } else {
-                    errorConsumer.accept("Aucune route à proximité");
+                    makePins();
                 }
             }
             });
