@@ -9,6 +9,8 @@ import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 import java.io.IOException;
 
@@ -62,9 +64,9 @@ public final class BaseMapManager {
             newS.addPreLayoutPulseListener(this::redrawIfNeeded);
         });
 
-        //mvParameters.addListener(observable -> redrawOnNextPulse());
-        //canvas.widthProperty().addListener(observable -> redrawOnNextPulse());
-        //canvas.heightProperty().addListener(observable -> redrawOnNextPulse());
+        mvParameters.addListener(observable -> redrawOnNextPulse());
+        canvas.widthProperty().addListener(observable -> redrawOnNextPulse());
+        canvas.heightProperty().addListener(observable -> redrawOnNextPulse());
 
     }
 
@@ -92,7 +94,6 @@ public final class BaseMapManager {
      * Draws the Tiles on the canvas
      */
     private void drawTilesOnCanvas() {
-
         //Offset for the tiles on canvas
         int xOffset = (int) Math.floor(mvParameters.getValue().x() % IMG_SIZE);
         int yOffset = (int) Math.floor(mvParameters.getValue().y() % IMG_SIZE);

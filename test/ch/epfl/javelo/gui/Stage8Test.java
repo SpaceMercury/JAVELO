@@ -15,13 +15,12 @@ import java.nio.file.Path;
 import java.util.function.Consumer;
 
 public final class Stage8Test extends Application {
-
     public static void main(String[] args) { launch(args); }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         Graph graph = Graph.loadFrom(Path.of("lausanne"));
-        Path cacheBasePath = Path.of("File");
+        Path cacheBasePath = Path.of(".");
         String tileServerHost = "tile.openstreetmap.org";
         TileManager tileManager =
                 new TileManager(cacheBasePath, tileServerHost);
@@ -31,9 +30,7 @@ public final class Stage8Test extends Application {
         ObjectProperty<MapViewParameters> mapViewParametersP =
                 new SimpleObjectProperty<>(mapViewParameters);
         ObservableList<Waypoint> waypoints =
-                FXCollections.observableArrayList(
-                        new Waypoint(new PointCh(2532697, 1152350), 159049),
-                        new Waypoint(new PointCh(2538659, 1154350), 117669));
+                FXCollections.observableArrayList();
         Consumer<String> errorConsumer = new ErrorConsumer();
 
         WaypointsManager waypointsManager =
@@ -62,4 +59,3 @@ public final class Stage8Test extends Application {
         public void accept(String s) { System.out.println(s); }
     }
 }
-
