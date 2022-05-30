@@ -64,9 +64,9 @@ public final class BaseMapManager {
             newS.addPreLayoutPulseListener(this::redrawIfNeeded);
         });
 
-        mvParameters.addListener(observable -> redrawOnNextPulse());
-        canvas.widthProperty().addListener(observable -> redrawOnNextPulse());
-        canvas.heightProperty().addListener(observable -> redrawOnNextPulse());
+//        mvParameters.addListener(observable -> redrawOnNextPulse());
+//        canvas.widthProperty().addListener(observable -> redrawOnNextPulse());
+//        canvas.heightProperty().addListener(observable -> redrawOnNextPulse());
 
     }
 

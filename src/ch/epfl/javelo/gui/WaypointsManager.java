@@ -10,8 +10,6 @@ import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.SVGPath;
 import java.util.HashMap;
 import java.util.function.Consumer;
@@ -24,7 +22,7 @@ public final class WaypointsManager {
     private static final String GREEN = "first";
     private static final String BLUE = "middle";
     private static final String RED = "last";
-    private static final String PIN = "pin";
+    private static final String PIN_NAME = "pin";
     private static final String OUT = "pin_outside";
     private static final String IN = "pin_inside";
     private static final String OUT_DESIGN = "M-8-20C-5-14-2-7 0 0 2-7 5-14 8-20 20-40-20-40-8-20";
@@ -58,6 +56,7 @@ public final class WaypointsManager {
         waypoints.addListener(this::setPins);
         property.addListener(c -> updatePins());
 
+        /**
         for(Waypoint waypoint : waypoints) {
             SVGPath ext = new SVGPath();
             SVGPath in = new SVGPath();
@@ -93,6 +92,7 @@ public final class WaypointsManager {
             pane.getChildren().add(pin);
         }
         updatePins();
+         */
     }
 
     /**
@@ -149,32 +149,37 @@ public final class WaypointsManager {
                 System.out.println("trying to add");
                 for(Waypoint waypoint : c.getAddedSubList()) {
                     SVGPath ext = new SVGPath();
-                    SVGPath in = new SVGPath();
                     ext.setContent(OUT_DESIGN);
                     ext.getStyleClass().add(OUT);
+                    SVGPath in = new SVGPath();
                     in.setContent(IN_DESIGN);
                     in.getStyleClass().add(IN);
                     Group pin = new Group(ext, in);
                     System.out.println(pin == null);
-                    pin.getStyleClass().add(PIN);
+                    pin.getStyleClass().add(PIN_NAME);
+                    pin.getStyleClass().add(GREEN);
                     pin.setLayoutX(PointWebMercator.ofPointCh(waypoint.point()).x());
                     pin.setLayoutY(PointWebMercator.ofPointCh(waypoint.point()).y());
                     pinToWaypoint.put(waypoint, pin);
                     pin.setOnMouseClicked(e -> {if(e.isStillSincePress()) {
+                        System.out.println("click");
                         waypoints.remove(waypoint);
                     }
                     });
                     pin.setOnMouseDragged(e -> {
+                        System.out.println("dragged");
                         pin.setLayoutX(pin.getLayoutX() + e.getX() - mouseLocation.getX());
                         pin.setLayoutY(pin.getLayoutY() + e.getY() - mouseLocation.getY());
                     });
                     pin.setOnMouseReleased(e -> {if(!e.isStillSincePress()) {
+                        System.out.println("released");
                         PointWebMercator pointWM = property.get().pointAt(e.getX(), e.getY());
                         PointCh pointCh = pointWM.toPointCh();
                         Waypoint point = newWaypoint(pointCh);
                         if(point != null && !waypoints.contains(point)){
                             pane.getChildren().remove(pinToWaypoint.remove(waypoint));
                             waypoints.set(waypoints.indexOf(waypoint), point);
+
                         } else {
                             updatePins();
                         }
@@ -197,14 +202,15 @@ public final class WaypointsManager {
     private void updatePins() {
         for(Waypoint waypoint : waypoints) {
             PointWebMercator point = PointWebMercator.ofPointCh(graph.nodePoint(waypoint.nodeId()));
+            MapViewParameters parameters = property.get();
             Group pin = pinToWaypoint.get(waypoint);
             System.out.println("in update");
             System.out.println(pin == null);
             pin.getStyleClass().remove(GREEN);
             pin.getStyleClass().remove(BLUE);
             pin.getStyleClass().remove(RED);
-            pin.setLayoutX(property.get().viewX(point));
-            pin.setLayoutY(property.get().viewY(point));
+            pin.setLayoutX(parameters.viewX(point));
+            pin.setLayoutY(parameters.viewY(point));
             if(waypoints.indexOf(waypoint) == 0) {
                 pin.getStyleClass().add(GREEN);
             } else if(waypoints.indexOf(waypoint) == waypoints.size() - 1) {
