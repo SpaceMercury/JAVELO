@@ -1,23 +1,14 @@
 package ch.epfl.javelo.gui;
 
+import ch.epfl.javelo.routing.Route;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.scene.layout.Pane;
 
 import java.util.function.Consumer;
 import ch.epfl.javelo.projection.PointCh;
-import ch.epfl.javelo.projection.PointWebMercator;
-import ch.epfl.javelo.routing.Route;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.collections.ListChangeListener;
 import javafx.geometry.Point2D;
-import javafx.scene.Node;
-import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polyline;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * @author fuentes
@@ -28,7 +19,11 @@ public final class RouteManager {
     private ReadOnlyObjectProperty<MapViewParameters> mvParameters;
     private final Consumer<String> errorConsumer;
     private  Polyline itinerary;
-    private final Circle disc;
+    private final Circle disk;
+    private final double diskPos;
+    private double xOffset;
+    private double yOffset;
+
 
 
     public RouteManager(RouteBean beanItinerary, ReadOnlyObjectProperty<MapViewParameters> mvParameters, Consumer<String> errorConsumer) {
@@ -37,175 +32,111 @@ public final class RouteManager {
         this.mvParameters = mvParameters;
         this.errorConsumer = errorConsumer;
         this.itinerary= new Polyline();
-        this.disc = new Circle(5);
+        this.disk = new Circle(5);
         itinerary.setId("route");
-        disc.setId("highlight");
+        disk.setId("highlight");
         itinerary.setVisible(true);
-        disc.setVisible(true);
+        disk.setVisible(true);
+        diskPos = beanItinerary.getHighlightedPosition();
         pane = new Pane();
         pane.getChildren().add(itinerary);
-        pane.getChildren().add(disc);
+        pane.getChildren().add(disk);
+        pane.setPickOnBounds(false);
 
         eventClickManager();
-      /*  reconstruct();
+        this.mvParameters.addListener((object, oV, nV) -> repositionLine(oV, nV));
+        this.beanItinerary.getRouteProperty().addListener((object, oV, nV) -> reconstructLine(oV, nV));
 
-        beanItinerary.waypoints().addListener((ListChangeListener<? super Waypoint>) e -> {
-            // rend le panneau invisible quand l'itinéraire entier n'existe pas
-            pane.setVisible(beanItinerary.route() != null);
-            reconstruct();
-            placeCircle();
-        });
-
-
-       */
     }
 
-  /*  private void placeCircle() {
-        Route route = bean.route();
 
-        if (route != null){
-            PointCh circlePointCh = route.pointAt(bean.highlightedPosition());
-            PointWebMercator circlePointWM = PointWebMercator.ofPointCh(circlePointCh);
-            MapViewParameters mapViewParameters = parameters.get();
+    /**
+     * Event manager for when the user clicks to add a waypoint
+     */
+    private void eventClickManager() {
+        disk.setOnMouseClicked(click -> {
+            //Transformed coordinates
+            Point2D mCoord = disk.localToParent(click.getX(), click.getY());
 
-            disc.setCenterX(mapViewParameters.viewX(circlePointWM));
-            disc.setCenterY(mapViewParameters.viewY(circlePointWM));
+            PointCh cursorPoint = (mvParameters.getValue().pointAt(mCoord.getX(), mCoord.getY())).toPointCh();
+            Waypoint newWaypoint = new Waypoint(cursorPoint, beanItinerary.getRoute().nodeClosestTo(beanItinerary.getHighlightedPosition()));
+
+            if (beanItinerary.getWaypoints().contains(newWaypoint)) {
+                errorConsumer.accept("Un point de passage est déjà présent à cet endroit!");
+            } else {
+                beanItinerary.getWaypoints().add(beanItinerary.getRoute().indexOfSegmentAt(beanItinerary.getHighlightedPosition())+1, newWaypoint);
+            }
+        });
+    }
+
+
+    /**
+     * Function that offsets the line when the map is dragged
+     * @param oldV old Value
+     * @param newV new Value
+     */
+    private void repositionLine(MapViewParameters oldV, MapViewParameters newV){
+
+        if(oldV.zoom() != newV.zoom()){
+            drawline();
+        }
+        else{
+            lineOffsets(oldV, newV);
         }
     }
 
-    private void reconstruct(){
-        System.out.println("reconstruct");
-
-        bean.routeProperty().addListener(event -> {
-            itinerary.getPoints().clear();
-            itinerary.setLayoutX(-parameters.get().coordX());
-            itinerary.setLayoutY(-parameters.get().coordY());
-
-            if(bean.routeProperty().get()!= null){
-                List<Double> points = new ArrayList<>();
-                System.out.println("route differente de null");
-
-                for (PointCh point :  bean.routeProperty().get().points()) {
-                    PointWebMercator pointWM = PointWebMercator.ofPointCh(point);
-                    points.add(pointWM.xAtZoomLevel(parameters.get().zoomLevel()));
-                    points.add(pointWM.yAtZoomLevel(parameters.get().zoomLevel()));
-                }
-                itinerary.getPoints().addAll(points);
-
-
-            }});
-
-
-    }
-    private void moveRoute(){
-        System.out.println("move route");
-
-        bean.routeProperty().addListener(event -> {
-            System.out.println("move route");
-
-            if(bean.routeProperty().get() != null){
-                itinerary.setLayoutX(-parameters.get().coordX());
-                itinerary.setLayoutY(-parameters.get().coordY());
-                disc.setCenterX(bean.routeProperty().get().pointAt(bean.highlightedPosition()).e());
-                disc.setCenterY(bean.routeProperty().get().pointAt(bean.highlightedPosition()).n());
-                System.out.println("route differente de null");
-
-            }});
+    private void drawline(){
 
     }
 
+    /**
+     * Function that calculates the offsets and applies them
+     * @param oldV old Value of the MapViewParameters
+     * @param newV New Value of the MapViewParameters
+     */
+    private void lineOffsets(MapViewParameters oldV, MapViewParameters newV){
+        xOffset = oldV.x() - newV.x();
+        yOffset = oldV.y() - newV.y();
 
+        //Apply the offsets to the polyline and disk
+        itinerary.setLayoutX(itinerary.getLayoutX() + xOffset);
+        itinerary.setLayoutY(itinerary.getLayoutY() + yOffset);
+        disk.setLayoutX(disk.getLayoutX() + xOffset);
+        disk.setLayoutY(disk.getLayoutY() + yOffset);
 
-   */
-
-    private void eventClickManager(){
-        disc.setOnMouseClicked(click -> {
-            //Transformed coordinates
-            Point2D mCoord = disc.localToParent(click.getX(), click.getY());
-
-            PointCh cursorPoint = (mvParameters.getValue().pointAt(mCoord.getX(), mCoord.getY())).toPointCh();
-            Waypoint newWaypoint = new Waypoint(cursorPoint,beanItinerary.getRoute().nodeClosestTo(beanItinerary.getHighlightedPosition()));
-
-                if(beanItinerary.getWaypoints().contains(newWaypoint)){
-                    errorConsumer.accept("Un point de passage est déjà présent à cet endroit!");
-                }
-                else{
-                    beanItinerary.getWaypoints().add(beanItinerary.getRoute().indexOfSegmentAt(beanItinerary.getHighlightedPosition()) , newWaypoint );
-                }
-        });
-
-
-
-/*
-        //la route change
-        bean.routeProperty().addListener(e -> {
-            System.out.println("routeProperty listener");
-
-            if ( e == null){
-                System.out.println("e null en listener RP");
-                System.out.println("invisible");
-                itinerary.setVisible(false);
-                disc.setVisible(false);
-
-
-            }else {
-                System.out.println("e pas null en listener RP");
-                System.out.println("Visible");
-                disc.setVisible(true);
-                itinerary.setVisible(true);
-
-                moveRoute();
-            }
-
-        });
-        // la highlightedPosition change
-        bean.highlightedPositionProperty().addListener((pos, oldV, newV) ->{
-            System.out.println("listener highlightedPosition");
-
-            if(Double.isNaN(newV.doubleValue())){
-                System.out.println("newV is null in highlightedPosition Listener");
-                System.out.println("invisible");
-                disc.setVisible(false);
-            }
-
-        });
-
-        //la object property (le mapviewparameter) change
-        parameters.addListener(e -> {
-            //disc.setVisible(false);
-            System.out.println("objectProperty Listener");
-
-            // System.out.println("reconstruct");
-
-        });
-
-        parameters.addListener((parameters, oldV, newV) ->{
-            if(oldV.zoomLevel() != newV.zoomLevel()){
-                //reconstruire route
-                reconstruct();
-            }else {
-                // deplacer route
-                moveRoute();
-            }
-            //placeCircle();
-        });
-
-        //bean.waypoints().addListener();
-        bean.waypoints().addListener((ListChangeListener<? super Waypoint>) c -> reconstruct());
-
-
-        //  itinerary.addEventHandler()
-
-
-     /*   //itineraire change
-        objectProperty.addListener((e)-> itinerary.setVisible(false));
-        //niveau de zoom change
-        objectProperty.addListener(e -> itinerary.setVisible(false));*/
+        //Set offsets to 0 again, as the new position will become the new old position
+        xOffset = 0;
+        yOffset = 0;
     }
+
+    /**
+     * Function that reconstructs the polyLine when the user zooms
+     * @param oldValue
+     * @param newValue
+     */
+    private void reconstructLine(Route oldValue, Route newValue){
+
+        if(newValue == null){
+            itinerary.setVisible(false);
+            disk.setVisible(false);
+        }
+        else{
+            if(!Double.isNaN(diskPos)){
+                disk.setVisible(true);
+            }
+            itinerary.setLayoutX(itinerary.getLayoutX());
+            itinerary.setLayoutY(itinerary.getLayoutY());
+            disk.setLayoutX(disk.getLayoutX());
+            disk.setLayoutY(disk.getLayoutY());
+            itinerary.setVisible(true);
+        }
+    }
+
 
 
     public Pane pane(){
         return pane;
     }
+
 }
 

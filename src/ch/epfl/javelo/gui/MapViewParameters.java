@@ -43,7 +43,7 @@ public record MapViewParameters(int zoom, double x, double y){
      * @return position x relative to the upper left corner of the portion of the map shown on screen
      */
     public double viewX(PointWebMercator point){
-        return point.xAtZoomLevel(zoom)-x;
+        return point.xAtZoomLevel(zoom);
     }
 
     /**
@@ -52,7 +52,7 @@ public record MapViewParameters(int zoom, double x, double y){
      * @return position y relative to the upper left corner of the portion of the map shown on screen
      */
     public double viewY(PointWebMercator point){
-        return point.xAtZoomLevel(zoom)-y;
+        return point.xAtZoomLevel(zoom);
     }
 
 

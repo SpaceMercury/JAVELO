@@ -178,8 +178,11 @@ public final class BaseMapManager {
      * Event manager for adding Waypoints
      */
     private void clickToAddWaypoint() {
+
+        pane.setOnMousePressed(press -> {
+            mousePoint2D.setValue(new Point2D(press.getX(), press.getY()));
+        });
         pane.setOnMouseClicked(click -> {
-            Point2D currentPoint = new Point2D(click.getX(), click.getY());
             waypointsManager.addWaypoint(mousePoint2D.getValue().getX(), mousePoint2D.getValue().getY());
         });
     }
