@@ -165,7 +165,6 @@ public final class WaypointsManager {
                     in.setContent(IN_DESIGN);
                     in.getStyleClass().add(IN);
                     Group pin = new Group(ext, in);
-                    System.out.println(pin == null);
                     pin.getStyleClass().add(PIN_NAME);
                     pin.getStyleClass().add(GREEN);
                     PointWebMercator p = PointWebMercator.of(property.get().zoom(),
@@ -214,7 +213,7 @@ public final class WaypointsManager {
                 }
             }
         }
-        //updatePins();
+        updatePins();
     }
 
 
