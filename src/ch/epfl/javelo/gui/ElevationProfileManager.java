@@ -4,11 +4,11 @@ import ch.epfl.javelo.routing.ElevationProfile;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.geometry.Insets;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.transform.Affine;
 
-import java.awt.event.MouseEvent;
 
 public final class ElevationProfileManager {
 

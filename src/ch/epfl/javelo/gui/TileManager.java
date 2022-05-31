@@ -9,13 +9,14 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * @author fuentes
  */
 public final class TileManager {
 
-    private final LinkedHashMap<TileId, Image> cache = new LinkedHashMap(100, 0.75f, true);
+    private final Map<TileId, Image> cache;
     private final Path access;
     private final String serverName;
 
@@ -29,6 +30,7 @@ public final class TileManager {
     public TileManager(Path access, String serverName) throws IOException {
         this.serverName = serverName;
         this.access = access;
+        this.cache = new LinkedHashMap(100, 0.75f, true);
     }
 
     /**
@@ -50,12 +52,17 @@ public final class TileManager {
 
         //Check if the image exists in the path
         if (Files.exists(finalPath)) {
-            InputStream path = new FileInputStream(finalPath.toFile());
-            return new Image(path);
+            try(InputStream path = new FileInputStream(finalPath.toFile())) {
+                cache.put(id, new Image(path));
+                return cache.get(id);
+            }
+        }
+        else {
+            storeImage(id, xPath, finalPath);
+            return cache.get(id);
         }
         //If the image of the tile wasn't in the previous: download it and store it
-        storeImage(id, xPath, finalPath);
-        return cache.get(id);
+
     }
 
     /**
@@ -77,12 +84,13 @@ public final class TileManager {
         try (InputStream i = c.getInputStream()) {
             OutputStream os = new FileOutputStream(Files.createDirectories(xPath).resolve(id.Y + ".png").toFile());
             i.transferTo(os);
+            try (InputStream i1 = new FileInputStream(finalPath.toFile())) {
+                Image streamImage = new Image(i1);
+                cache.put(id, streamImage);
+            }
         }
         //Obtain image from the Path and put it into the cache for faster access
-        try (InputStream i = new FileInputStream(finalPath.toFile())) {
-            Image streamImage = new Image(i);
-            cache.put(id, streamImage);
-        }
+
     }
 
     /**

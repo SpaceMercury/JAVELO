@@ -206,6 +206,5 @@ public final class Graph {
             return Functions.constant(Double.NaN);
         }
     }
-
 }
 
