@@ -61,6 +61,8 @@ public final class WaypointsManager {
         this.pane = new Pane();
         this.pane.setPickOnBounds(false);
     }
+    //TODO: Remake the whole class for Waypoints Manager
+    //TODO: Debug the duo WPM and BMM with Coralies classes, to see where the error might be
 }
 
 
