@@ -28,7 +28,7 @@ public final class BaseMapManager {
     private static int MIN_ZOOM = 8;
     private static int MAX_ZOOM = 19;
     private final WaypointsManager waypointsManager;
-    private ObjectProperty<Point2D> mousePoint2D;
+    private final ObjectProperty<Point2D> mousePoint2D;
     private final ObjectProperty<MapViewParameters> mvParameters;
 
     /**
@@ -46,6 +46,7 @@ public final class BaseMapManager {
         this.canvas = new Canvas();
         this.pane = new Pane(canvas);
         this.tileManager = tileManager;
+        this.mousePoint2D = new SimpleObjectProperty<>();
         mvParameters = mapViewParameters;
         //bind canvas to the pane
         canvas.widthProperty().bind(pane.widthProperty());
@@ -158,8 +159,6 @@ public final class BaseMapManager {
      * Event manager for moving the by dragging
      */
     private void moveCursor() {
-
-        mousePoint2D = new SimpleObjectProperty<>();
         pane.setOnMousePressed(press -> {
             mousePoint2D.setValue(new Point2D(press.getX(), press.getY()));
         });
