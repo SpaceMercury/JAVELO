@@ -33,7 +33,7 @@ public final class JaVelo extends Application {
         MenuBar menuBar = new MenuBar(file);
 
 
-        SplitPane.setResizableWithParent();
+//        SplitPane.setResizableWithParent();
 
         BorderPane borderPane = new BorderPane();
         borderPane.getChildren().add(splitPane);

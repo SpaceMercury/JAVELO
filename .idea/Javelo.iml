@@ -13,5 +13,6 @@
     <orderEntry type="library" scope="TEST" name="junit.jupiter" level="project" />
     <orderEntry type="library" name="OpenJFX 18" level="application" />
     <orderEntry type="library" name="JavaF" level="project" />
+    <orderEntry type="library" exported="" name="JAVAFX" level="application" />
   </component>
 </module>
