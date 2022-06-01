@@ -1,260 +1,195 @@
 package ch.epfl.javelo.gui;
 
 import ch.epfl.javelo.data.Graph;
+import ch.epfl.javelo.gui.MapViewParameters;
+import ch.epfl.javelo.gui.Waypoint;
 import ch.epfl.javelo.projection.PointCh;
 import ch.epfl.javelo.projection.PointWebMercator;
-import ch.epfl.javelo.projection.WebMercator;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.SVGPath;
+
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.function.Consumer;
 
-/**
- * @author ventura
- */
 public final class WaypointsManager {
-    //Constants used in the class
-    private static final String GREEN = "first";
-    private static final String BLUE = "middle";
-    private static final String RED = "last";
-    private static final String PIN_NAME = "pin";
-    private static final String OUT = "pin_outside";
-    private static final String IN = "pin_inside";
-    private static final String OUT_DESIGN = "M-8-20C-5-14-2-7 0 0 2-7 5-14 8-20 20-40-20-40-8-20";
-    private static final String IN_DESIGN = "M0-23A1 1 0 000-29 1 1 0 000-23";
-    private static final String ERROR = "Aucune route à proximité !";
-    private static final int SEARCH_RADIUS = 500;
-    //Attributes of the class
+    private final static String PIN_PATH = "pin";
+    private final static String OUT_C_PATH = "M-8-20C-5-14-2-7 0 0 2-7 5-14 8-20 20-40-20-40-8-20";
+    private final static String OUT_PATH = "pin_outside";
+    private final static String IN_C_PATH = "M0-23A1 1 0 000-29 1 1 0 000-23";
+    private final static String IN_PATH = "pin_inside";
+    private final static String FIRST_PATH = "first";
+    private final static String MID_PATH = "middle";
+    private final static String LAST_PATH = "last";
+    private final static String ERROR = "Aucune route à proximité !";
+
     private final Graph graph;
-    private final ObjectProperty<MapViewParameters> property;
+    private final ObjectProperty<MapViewParameters> parameters;
     private final ObservableList<Waypoint> waypoints;
     private final Consumer<String> errorConsumer;
     private final Pane pane;
-    private final HashMap<Waypoint, Group> pinToWaypoint = new HashMap<>();
-    private Point2D mouseLocation;
 
-    /**
-     * Constructor of the WaypointsManager class
-     * @param graph the graph of Manager
-     * @param property the object property on the mapview
-     * @param waypoints the observable list of waypoints
-     * @param errorConsumer the error consumer
-     */
-    public WaypointsManager(Graph graph, ObjectProperty<MapViewParameters> property,
-                            ObservableList<Waypoint> waypoints, Consumer<String> errorConsumer) {
+    private final HashMap<Waypoint, Group> groupMap = new HashMap<>();
+    private Point2D mousePoint;
+
+    public WaypointsManager(Graph graph,
+                            ObjectProperty<MapViewParameters> parameters,
+                            ObservableList<Waypoint> waypoints,
+                            Consumer<String> errorConsumer) {
+
         this.graph = graph;
-        this.property = property;
+        this.parameters = parameters;
         this.waypoints = waypoints;
         this.errorConsumer = errorConsumer;
-        this.pane = new Pane();
-        this.pane.setPickOnBounds(false);
-        waypoints.addListener(this::setPins);
-        property.addListener(c -> updatePins());
-        for(Waypoint waypoint : waypoints) {
-            SVGPath ext = new SVGPath();
-            ext.setContent(OUT_DESIGN);
-            ext.getStyleClass().add(OUT);
-            SVGPath in = new SVGPath();
-            in.setContent(IN_DESIGN);
-            in.getStyleClass().add(IN);
-            Group pin = new Group(ext, in);
-            System.out.println(pin == null);
-            pin.getStyleClass().add(PIN_NAME);
-            pin.getStyleClass().add(GREEN);
-            pin.setLayoutX(PointWebMercator.ofPointCh(waypoint.point()).x());
-            pin.setLayoutY(PointWebMercator.ofPointCh(waypoint.point()).y());
-            PointWebMercator p = PointWebMercator.of(property.get().zoom(),
-                    WebMercator.x(graph.nodePoint(waypoint.nodeId()).lon()),
-                    WebMercator.y(graph.nodePoint(waypoint.nodeId()).lat()));
-            pin.setLayoutX(p.x());
-            System.out.println("x: " + p.x());
-            System.out.println("x of pin: " + pin.getLayoutX());
-            pin.setLayoutY(p.y());
-            System.out.println("y: " + p.y());
-            System.out.println("y of pin: " + pin.getLayoutY());
-            pinToWaypoint.put(waypoint, pin);
-            pin.getStyleClass().add(GREEN);
-            pin.setOnMouseClicked(e -> {if(e.isStillSincePress()) {
-                System.out.println("click");
-                waypoints.remove(waypoint);
-            }
-            });
-            pin.setOnMouseDragged(e -> {
-                System.out.println("dragged");
-                pin.setLayoutX(pin.getLayoutX() + e.getX() - mouseLocation.getX());
-                pin.setLayoutY(pin.getLayoutY() + e.getY() - mouseLocation.getY());
-                pin.setLayoutX(mouseLocation.getX());
-                pin.setLayoutY(mouseLocation.getY());
-            });
-            pin.setOnMouseReleased(e -> {if(!e.isStillSincePress()) {
-                System.out.println("released");
-                PointWebMercator pointWM = property.get().pointAt(e.getX(), e.getY());
-                PointCh pointCh = pointWM.toPointCh();
-                Waypoint point = newWaypoint(pointCh);
-                if(point != null && !waypoints.contains(point)){
-                    pane.getChildren().remove(pinToWaypoint.remove(waypoint));
-                    waypoints.set(waypoints.indexOf(waypoint), point);
 
-                } else {
-                    updatePins();
-                }
-            }
-            });
-            pin.setOnMousePressed(this::press);
-            pane.getChildren().add(pin);
+        this.pane = new Pane();
+        pane.setPickOnBounds(false);
+
+        waypoints.addListener(this::setSVG);
+        parameters.addListener(c -> updateSVG());
+
+        for (Waypoint waypoint : waypoints) {
+            addedWaypoint(waypoint);
         }
-         updatePins();
+        updateSVG();
     }
 
-    /**
-     * Method that returns the pane
-     * @return the pane that contains the waypoints
-     */
     public Pane pane() {
         return pane;
     }
 
-    /**
-     * Method that adds a new point from a selected point (providing it is possible)
-     * @param x x-coord of the selected point
-     * @param y y-coord of the selected point
-     */
     public void addWaypoint(double x, double y) {
-        System.out.println("Waypoint is called");
-        PointWebMercator pointWM = property.get().pointAt(x, y);
-        PointCh point = pointWM.toPointCh();
-        Waypoint waypoint = newWaypoint(point);
-        if(waypoint != null && !waypoints.contains(waypoint)) {
-            System.out.println("waypoint is added");
-            waypoints.add(waypoint);
-        } else if(waypoints.contains(waypoint)) {
-            System.out.println("Waypoint is deleted");
+        Waypoint point = createWaypoint(x, y);
+
+        if (point == null) {
+            return;
+        }
+        if (waypoints.contains(point)) {
+            return;
+        }
+
+        waypoints.add(point);
+    }
+
+    private Waypoint createWaypoint(double x, double y) {
+        PointWebMercator pointWM = parameters.get().pointAt(x, y);
+
+        PointCh pointCh = pointWM.toPointCh();
+        if (pointCh == null) {
+            errorConsumer.accept(ERROR);
+            return null;
+        }
+        int nodeId = graph.nodeClosestTo(pointCh, 500);
+        if (nodeId == -1) {
+            errorConsumer.accept(ERROR);
+            return null;
+        }
+        return new Waypoint(graph.nodePoint(nodeId), nodeId);
+    }
+
+    private void setSVG(ListChangeListener.Change<? extends Waypoint> c) {
+        while (c.next()) {
+            if (c.wasAdded()) {
+                for (Waypoint waypoint : c.getAddedSubList()) {
+                    addedWaypoint(waypoint);
+                }
+            }
+            if (c.wasRemoved()) {
+                for (Waypoint waypoint : c.getRemoved()) {
+                    removedWaypoint(waypoint);
+                }
+            }
+        }
+        updateSVG();
+    }
+
+    private void addedWaypoint(Waypoint waypoint) {
+        SVGPath outline = new SVGPath();
+        outline.setContent(OUT_C_PATH);
+        outline.getStyleClass().add(OUT_PATH);
+
+        SVGPath circle = new SVGPath();
+        circle.setContent(IN_C_PATH);
+        circle.getStyleClass().add(IN_PATH);
+
+        Group pin = new Group(outline, circle);
+        pin.getStyleClass().add(PIN_PATH);
+        pin.setOnMouseClicked(event -> MouseClickManager(event, waypoint));
+        pin.setOnMouseDragged(e -> MouseDragManager(e, pin));
+        pin.setOnMouseReleased(e -> MouseReleaseManager(e, pin, waypoint));
+        pin.setOnMousePressed(this::MousePressManager);
+
+        pane.getChildren().add(pin);
+        groupMap.put(waypoint, pin);
+    }
+
+
+    private void removedWaypoint(Waypoint waypoint) {
+        pane.getChildren().remove(groupMap.remove(waypoint));
+    }
+
+
+    private void updateSVG() {
+        for (Waypoint waypoint : waypoints) {
+            Group pin = groupMap.get(waypoint);
+
+            pin.getStyleClass().remove(FIRST_PATH);
+            pin.getStyleClass().remove(MID_PATH);
+            pin.getStyleClass().remove(LAST_PATH);
+            PointWebMercator pinPoint = PointWebMercator.ofPointCh(graph.nodePoint(waypoint.nodeId()));
+            MapViewParameters param = parameters.get();
+
+            pin.setLayoutX(param.viewX(pinPoint));
+            pin.setLayoutY(param.viewY(pinPoint));
+
+            int last = waypoints.size() - 1;
+            int index = waypoints.indexOf(waypoint);
+
+            if (index == 0) {
+                pin.getStyleClass().add(FIRST_PATH);
+            } else if (index == last) {
+                pin.getStyleClass().add(LAST_PATH);
+            } else {
+                pin.getStyleClass().add(MID_PATH);
+            }
+        }
+    }
+
+    private void MouseClickManager(MouseEvent mouseEvent, Waypoint waypoint) {
+        if (mouseEvent.isStillSincePress()) {
             waypoints.remove(waypoint);
         }
     }
 
-    /**
-     * Method that will turn a PointCh into a point (if it is possible)
-     * @param point the PointCh that is to be turned into a point
-     * @return a new point, or null if it could not be made
-     */
-    private Waypoint newWaypoint(PointCh point) {
-        System.out.println("new waypoint is called");
-        if(point == null) {
-            errorConsumer.accept(ERROR);
-            return null;
-        }
-        int nodeId = graph.nodeClosestTo(point, SEARCH_RADIUS);
-        if(nodeId == -1) {
-            errorConsumer.accept(ERROR);
-            return null;
-        }
-        return new Waypoint(point, nodeId);
-    }
-
-    private void setPins(ListChangeListener.Change<? extends Waypoint> c) {
-        while(c.next()) {
-            if(c.wasRemoved()) {
-                for(Waypoint waypoint : c.getRemoved()) {
-                    pane.getChildren().remove(pinToWaypoint.remove(waypoint));
-                }
-            }
-            if(c.wasAdded()) {
-                System.out.println("trying to add");
-                for(Waypoint waypoint : c.getAddedSubList()) {
-                    SVGPath ext = new SVGPath();
-                    ext.setContent(OUT_DESIGN);
-                    ext.getStyleClass().add(OUT);
-                    SVGPath in = new SVGPath();
-                    in.setContent(IN_DESIGN);
-                    in.getStyleClass().add(IN);
-                    Group pin = new Group(ext, in);
-                    System.out.println(pin == null);
-                    pin.getStyleClass().add(PIN_NAME);
-                    pin.getStyleClass().add(GREEN);
-                    pin.setLayoutX(PointWebMercator.ofPointCh(waypoint.point()).x());
-                    pin.setLayoutY(PointWebMercator.ofPointCh(waypoint.point()).y());
-                    PointWebMercator p = PointWebMercator.of(property.get().zoom(),
-                            WebMercator.x(graph.nodePoint(waypoint.nodeId()).lon()),
-                            WebMercator.y(graph.nodePoint(waypoint.nodeId()).lat()));
-                    pin.setLayoutX(p.x());
-                    System.out.println("x: " + p.x());
-                    System.out.println("x of pin: " + pin.getLayoutX());
-                    pin.setLayoutY(p.y());
-                    System.out.println("y: " + p.y());
-                    System.out.println("y of pin: " + pin.getLayoutY());
-                    pinToWaypoint.put(waypoint, pin);
-                    pin.getStyleClass().add(GREEN);
-                    pin.setOnMouseClicked(e -> {if(e.isStillSincePress()) {
-                        System.out.println("click");
-                        waypoints.remove(waypoint);
-                    }
-                    });
-                    pin.setOnMouseDragged(e -> {
-                        System.out.println("dragged");
-                        pin.setLayoutX(pin.getLayoutX() + e.getX() - mouseLocation.getX());
-                        pin.setLayoutY(pin.getLayoutY() + e.getY() - mouseLocation.getY());
-                        pin.setLayoutX(mouseLocation.getX());
-                        pin.setLayoutY(mouseLocation.getY());
-                    });
-                    pin.setOnMouseReleased(e -> {if(!e.isStillSincePress()) {
-                        System.out.println("released");
-                        PointWebMercator pointWM = property.get().pointAt(e.getX(), e.getY());
-                        PointCh pointCh = pointWM.toPointCh();
-                        Waypoint point = newWaypoint(pointCh);
-                        if(point != null && !waypoints.contains(point)){
-                            pane.getChildren().remove(pinToWaypoint.remove(waypoint));
-                            waypoints.set(waypoints.indexOf(waypoint), point);
-
-                        } else {
-                            updatePins();
-                        }
-                    }
-                    });
-                    pin.setOnMousePressed(this::press);
-                    pane.getChildren().add(pin);
-                }
-            }
-        }
-        updatePins();
+    private void MousePressManager(MouseEvent mouseEvent) {
+        mousePoint = new Point2D(mouseEvent.getX(), mouseEvent.getY());
     }
 
 
-
-    private void press(MouseEvent e) {
-        mouseLocation = new Point2D(e.getX(), e.getY());
+    private void MouseDragManager(MouseEvent mouseEvent, Group pin) {
+        pin.setLayoutX(pin.getLayoutX() + mouseEvent.getX() - mousePoint.getX());
+        pin.setLayoutY(pin.getLayoutY() + mouseEvent.getY() - mousePoint.getY());
     }
 
-    private void updatePins() {
-        for(Waypoint waypoint : waypoints) {
-            PointWebMercator point = PointWebMercator.ofPointCh(graph.nodePoint(waypoint.nodeId()));
-            MapViewParameters parameters = property.get();
-            Group pin = pinToWaypoint.get(waypoint);
-            System.out.println("in update");
-            System.out.println(pin == null);
-            pin.getStyleClass().remove(GREEN);
-            pin.getStyleClass().remove(BLUE);
-            pin.getStyleClass().remove(RED);
-            pin.setLayoutX(parameters.viewX(point));
-            pin.setLayoutY(parameters.viewY(point));
-            if(waypoints.indexOf(waypoint) == 0) {
-                pin.getStyleClass().add(GREEN);
-            } else if(waypoints.indexOf(waypoint) == waypoints.size() - 1) {
-                pin.getStyleClass().add(RED);
+    private void MouseReleaseManager(MouseEvent mouseEvent, Group pin, Waypoint waypoint) {
+        if (!mouseEvent.isStillSincePress()) {
+            int index = waypoints.indexOf(waypoint);
+            Waypoint newWaypoint = createWaypoint(pin.getLayoutX(), pin.getLayoutY());
+            if (newWaypoint != null && !waypoints.contains(newWaypoint)) {
+
+                removedWaypoint(waypoint);
+                waypoints.remove(index);
+
+                waypoints.add(index, newWaypoint);
             } else {
-                pin.getStyleClass().add(BLUE);
+                updateSVG();
             }
         }
     }
+    //TODO: (SUPER IMPORTANT!!!!!)this class needs to be rewritten, but it works
 }
-

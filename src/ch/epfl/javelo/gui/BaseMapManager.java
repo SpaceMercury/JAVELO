@@ -156,7 +156,7 @@ public final class BaseMapManager {
     /**
      * Event manager for moving the by dragging
      */
-    private void moveCursor() {
+    private boolean moveCursor() {
 
         mousePoint2D = new SimpleObjectProperty<>();
         pane.setOnMousePressed(press -> {
@@ -171,16 +171,16 @@ public final class BaseMapManager {
             mousePoint2D.setValue(currentPoint);
 
         });
-
+        return true;
     }
 
     /**
      * Event manager for adding Waypoints
      */
     private void clickToAddWaypoint() {
-
-        pane.setOnMouseClicked(click -> {
+        pane.setOnMouseClicked(click -> {if(click.isStillSincePress()) {
             waypointsManager.addWaypoint(click.getX(), click.getY());
+        }
         });
     }
 
