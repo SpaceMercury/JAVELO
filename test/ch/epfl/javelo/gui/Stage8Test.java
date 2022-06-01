@@ -30,7 +30,8 @@ public final class Stage8Test extends Application {
         ObjectProperty<MapViewParameters> mapViewParametersP =
                 new SimpleObjectProperty<>(mapViewParameters);
         ObservableList<Waypoint> waypoints =
-                FXCollections.observableArrayList();
+                FXCollections.observableArrayList(new Waypoint(new PointCh(2532697, 1152350), 159049),
+                        new Waypoint(new PointCh(2538659, 1154350), 117669));
         Consumer<String> errorConsumer = new ErrorConsumer();
 
         WaypointsManager waypointsManager =
