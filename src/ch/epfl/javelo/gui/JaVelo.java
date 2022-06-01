@@ -1,6 +1,7 @@
 package ch.epfl.javelo.gui;
 
 import ch.epfl.javelo.data.Graph;
+import ch.epfl.javelo.routing.CityBikeCF;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
@@ -24,14 +25,14 @@ public final class JaVelo extends Application {
         primaryStage.setMinWidth(800);
         primaryStage.setMinHeight(600);
         String tileServerHost = "tile.openstreetmap.org";
-        //Path cacheBasePath = Path.of("osm-cache");
-        //Graph graph = Graph.loadFrom(Path.of("javelo-data"));
+        Path cacheBasePath = Path.of("osm-cache");
+        Graph graph = Graph.loadFrom(Path.of("javelo-data"));
+        CityBikeCF costFunction = new CityBikeCF(graph);
 
         SplitPane splitPane = new SplitPane();
         MenuItem exporterGPX = new MenuItem("Exporter GPX");
         Menu file = new Menu("Fichier");
         MenuBar menuBar = new MenuBar(file);
-
 
 //        SplitPane.setResizableWithParent();
 
