@@ -43,7 +43,9 @@ public final class ElevationProfileManager {
 
     //Constants
     private final static Insets INSETS = new Insets(10, 10, 20, 40);
-    private static final int METER_MULTI = 1000;
+    private final static int METER_MULTI = 1000;
+    private final static int POS_MIN_DISTANCE = 50;
+    private final static int ELE_MIN_DISTANCE = 25;
     private final static int[] POS_STEPS =
             {1000, 2000, 5000, 10_000, 25_000, 50_000, 100_000};
     private final static int[] ELE_STEPS =
@@ -51,7 +53,6 @@ public final class ElevationProfileManager {
 
 
     /**
-     * \
      * Public ElevationProfileManager Constructor
      *
      * @param readObject the ObjectProperty of the ElevationProfile
@@ -74,21 +75,21 @@ public final class ElevationProfileManager {
         vBox.setId("profile_data");
         borderPane = new BorderPane(pane, null, null, vBox, null);
         borderPane.getStylesheets().add("elevation_profile.css");
-
         borderPane.setCenter(pane);
         mouse = new SimpleDoubleProperty();
-
         screenToWorld = new SimpleObjectProperty<>(new Affine());
         worldToScreen = new SimpleObjectProperty<>(new Affine());
-
 
         //binding the rectangle to the pane
         borderRectangle = new SimpleObjectProperty<>(Rectangle2D.EMPTY);
         borderRectangle.bind(Bindings.createObjectBinding(this::createRectangle,
                 pane.widthProperty(), pane.heightProperty()));
 
-        createPolygon();
+        setScreenToWorldTransform();
         eventHandler();
+        createPolygon();
+        showText();
+        createGrid();
 
         //Listeners for redrawing the grid, the bottom text,
         //And recalculating the conversions
@@ -106,9 +107,12 @@ public final class ElevationProfileManager {
             showText();
             createGrid();
         });
-        this.readDouble.addListener((a, b, c) -> movingLine());
+        this.readDouble.addListener((p, oV, nV) -> movingLine());
     }
 
+    /**
+     * Function that generates the polygon of the profile
+     */
     private void createPolygon() {
 
         if (elevationProfileProperty.get() != null) {
@@ -139,35 +143,37 @@ public final class ElevationProfileManager {
 
     }
 
-
+    /**
+     * Function that creates the moving line inside the rectangle
+     */
     private void movingLine() {
-        Rectangle2D rectangle = borderRectangle.get();
-
         if (!readDouble.getValue().isNaN()) {
 
+            //Make the line visible
             line.setVisible(true);
 
             //Transform the coordinate to the rectangle coordinates
-            double x = worldToScreen.get().transform(readDouble.getValue(), 0).getX();
-            line.setStartX(x);
-            line.setStartY(rectangle.getMaxY());
-            line.setEndX(x);
-            line.setEndY(rectangle.getMinY());
-
+            double xCoord = worldToScreen.get().transform(readDouble.getValue(), 0).getX();
+            line.setStartY(borderRectangle.get().getMaxY());
+            line.setStartX(xCoord);
+            line.setEndY(borderRectangle.get().getMinY());
+            line.setEndX(xCoord);
         } else {
+            //Hide the line
             line.setVisible(false);
         }
     }
 
+
+    /**
+     * Function that creates the grid in the rectangle
+     */
     private void createGrid() {
-        //clear if there was a previous grid
+        //Clear if there was a previous grid
         group.getChildren().clear();
         path.getElements().clear();
 
-        //A List to store the 2 pathElements
-        List<PathElement> pathElements = path.getElements();
-
-        // Get the value of elevationProfile
+        //Get the value of elevationProfile
         ElevationProfile profile = elevationProfileProperty.get();
         Rectangle2D rectangle2D = borderRectangle.get();
         double elevation = profile.maxElevation() - profile.minElevation();
@@ -177,18 +183,20 @@ public final class ElevationProfileManager {
 
         for (int posStep : POS_STEPS) {
             pos = posStep;
-            if (pos * rectangle2D.getWidth() / profile.length() >= 50) {
+            if (pos * rectangle2D.getWidth() / profile.length() >= POS_MIN_DISTANCE) {
                 break;
             }
         }
 
         for (int eleStep : ELE_STEPS) {
             ele = eleStep;
-            if ((ele * rectangle2D.getHeight() / elevation >= 25)) {
+            if ((ele * rectangle2D.getHeight() / elevation >= ELE_MIN_DISTANCE)) {
                 break;
             }
         }
 
+
+        // Iterate on all the grid lines and add them to the pathElements List
 
         for (int i = 0; i < profile.length() / pos; i++) {
 
@@ -196,9 +204,8 @@ public final class ElevationProfileManager {
 
             Text posText = new Text(Integer.toString(pos * i / METER_MULTI));
 
-            pathElements.add(new MoveTo(transformedX, borderRectangle.get().getMaxY()));
-            pathElements.add(new LineTo(transformedX, borderRectangle.get().getMinY()));
-
+            path.getElements().add(new MoveTo(transformedX, borderRectangle.get().getMaxY()));
+            path.getElements().add(new LineTo(transformedX, borderRectangle.get().getMinY()));
 
             posText.getStyleClass().add("grid_label");
             posText.getStyleClass().add("horizontal");
@@ -213,8 +220,8 @@ public final class ElevationProfileManager {
         for (int i = 0; i < elevation / ele; i++) {
             double transformedY = rectangle2D.getMaxY() + worldToScreen.get().deltaTransform(0, ele * i).getY();
 
-            pathElements.add(new MoveTo(rectangle2D.getMinX(), transformedY));
-            pathElements.add(new LineTo(rectangle2D.getMaxX(), transformedY));
+            path.getElements().add(new MoveTo(rectangle2D.getMinX(), transformedY));
+            path.getElements().add(new LineTo(rectangle2D.getMaxX(), transformedY));
 
             Text altText = new Text(Integer.toString((int) (ele * i + profile.minElevation())));
             altText.getStyleClass().add("grid_label");
@@ -230,7 +237,7 @@ public final class ElevationProfileManager {
     }
 
     /**
-     *
+     * Function that sets the bottom part of the text, showing statistics for our Route
      */
     private void showText() {
 
@@ -248,6 +255,11 @@ public final class ElevationProfileManager {
     }
 
 
+    /**
+     * Function that sets the functions worldToScreen and screenToWorld
+     * Which convert the coordinates of the world to the screen
+     * And the coordinates of the screen to the world respectively
+     */
     private void setScreenToWorldTransform() {
         if (elevationProfileProperty.get() != null) {
 
@@ -273,7 +285,7 @@ public final class ElevationProfileManager {
 
 
     /**
-     * Event handler for
+     * Event handler for when the mouse is out of bounds
      */
     private void eventHandler() {
         pane.setOnMouseMoved(move -> {
@@ -299,7 +311,7 @@ public final class ElevationProfileManager {
     }
 
     /**
-     * getter for the pane
+     * Getter for the pane
      *
      * @return the borderPane where all of our graphic context is situated
      */
