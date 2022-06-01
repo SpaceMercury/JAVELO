@@ -12,7 +12,6 @@ import javafx.scene.Group;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.SVGPath;
-
 import java.util.HashMap;
 import java.util.function.Consumer;
 
@@ -63,29 +62,14 @@ public final class WaypointsManager {
     }
 
     public void addWaypoint(double x, double y) {
-        Waypoint point = createWaypoint(x, y);
-        if (point == null) {
-            return;
-        }
-        if (waypoints.contains(point)) {
-            return;
-        }
-        waypoints.add(point);
-    }
-
-    private Waypoint createWaypoint(double x, double y) {
         PointWebMercator pointWM = property.get().pointAt(x, y);
         PointCh pointCh = pointWM.toPointCh();
-        if (pointCh == null) {
+        if (pointCh == null || (graph.nodeClosestTo(pointCh, SEARCH_DISTANCE) == -1)) {
             errorConsumer.accept(ERROR);
-            return null;
+            return;
         }
-        int nodeId = graph.nodeClosestTo(pointCh, SEARCH_DISTANCE);
-        if (nodeId == -1) {
-            errorConsumer.accept(ERROR);
-            return null;
-        }
-        return new Waypoint(graph.nodePoint(nodeId), nodeId);
+        waypoints.add(new Waypoint(graph.nodePoint(graph.nodeClosestTo(pointCh, SEARCH_DISTANCE)),
+                graph.nodeClosestTo(pointCh, SEARCH_DISTANCE)));
     }
 
     private void setSVG(ListChangeListener.Change<? extends Waypoint> c) {
@@ -161,7 +145,15 @@ public final class WaypointsManager {
     private void release(MouseEvent mouseEvent, Waypoint waypoint, Group pin) {
         if (!mouseEvent.isStillSincePress()) {
             int id = waypoints.indexOf(waypoint);
-            Waypoint newWaypoint = createWaypoint(pin.getLayoutX(), pin.getLayoutY());
+            PointWebMercator pointWM = property.get().pointAt(pin.getLayoutX(), pin.getLayoutY());
+            PointCh pointCh = pointWM.toPointCh();
+            Waypoint newWaypoint = null;
+            if (pointCh == null || (graph.nodeClosestTo(pointCh, SEARCH_DISTANCE) == -1)) {
+                errorConsumer.accept(ERROR);
+            } else {
+                newWaypoint = new Waypoint(graph.nodePoint(graph.nodeClosestTo(pointCh, SEARCH_DISTANCE)),
+                        graph.nodeClosestTo(pointCh, SEARCH_DISTANCE));
+            }
             if (newWaypoint != null && !waypoints.contains(newWaypoint)) {
                 pane.getChildren().remove(pins.remove(waypoint));
                 waypoints.set(id, newWaypoint);
