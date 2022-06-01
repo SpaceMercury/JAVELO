@@ -28,7 +28,7 @@ public final class RouteBean{
     public RouteBean(RouteComputer computer) {
         this.computer = computer;
         this.waypoints = observableArrayList();
-        this.route = new SimpleObjectProperty<>();
+        this.route = new SimpleObjectProperty<>(null);
         this.highlightedPosition = new SimpleDoubleProperty(Double.NaN);
         this.elevationProfile = new SimpleObjectProperty<>(null);
         updateListeners();
@@ -47,16 +47,26 @@ public final class RouteBean{
             boolean nullProperty = false; //will become true if two waypoints cannot be connected or list is too short
             if(waypoints.size() > 1) {
                 List<Route> subRoutes = new ArrayList<>();
-                Route bestRoute = null;
-                int startId = 0, endId = 0;
+                Route bestRoute;
+                int startId, endId;
                 for (int i = 0; i < waypoints.size() - 1; i++) {
                     startId = waypoints.get(i).nodeId();
                     endId = waypoints.get(i).nodeId();
+                    boolean cached = false;
                     NodePair current = new NodePair(startId, endId);
                     if(!routeCache.containsKey(current)) {
-                        routeCache.put(current, computer.bestRouteBetween(current.firstId, current.secondId));
+                        if(routeCache.size() < MAX_SIZE - 1) {
+                            routeCache.put(current, computer.bestRouteBetween(current.firstId, current.secondId));
+                            cached = true;
+                        }
+                    } else {
+                        cached = true;
                     }
-                    bestRoute = routeCache.get(current);
+                    if(cached) {
+                        bestRoute = routeCache.get(current);
+                    } else {
+                        bestRoute = computer.bestRouteBetween(current.firstId, current.secondId);
+                    }
                     subRoutes.add(bestRoute);
                 }
             }
