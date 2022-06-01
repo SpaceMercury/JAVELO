@@ -85,6 +85,7 @@ public final class ElevationProfileManager {
         borderRectangle.bind(Bindings.createObjectBinding(this::createRectangle,
                 pane.widthProperty(), pane.heightProperty()));
 
+        //call all the methods
         setScreenToWorldTransform();
         eventHandler();
         createPolygon();
@@ -93,14 +94,14 @@ public final class ElevationProfileManager {
 
         //Listeners for redrawing the grid, the bottom text,
         //And recalculating the conversions
-        elevationProfileProperty.addListener(x -> {
+        elevationProfileProperty.addListener((p, oV, nV) -> {
             setScreenToWorldTransform();
             eventHandler();
             createPolygon();
             showText();
             createGrid();
         });
-        borderRectangle.addListener(x -> {
+        borderRectangle.addListener((p, oV, nV) -> {
             setScreenToWorldTransform();
             eventHandler();
             createPolygon();
