@@ -1,8 +1,11 @@
-/**
+
 package ch.epfl.javelo.gui;
 
 import ch.epfl.javelo.data.Graph;
 import ch.epfl.javelo.routing.CityBikeCF;
+import ch.epfl.javelo.routing.ElevationProfile;
+import ch.epfl.javelo.routing.ElevationProfileComputer;
+import ch.epfl.javelo.routing.RouteComputer;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
@@ -14,6 +17,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.nio.file.Path;
+import java.util.function.Consumer;
 
 public final class JaVelo extends Application {
 
@@ -25,25 +29,30 @@ public final class JaVelo extends Application {
         primaryStage.setTitle("JaVelo");
         primaryStage.setMinWidth(800);
         primaryStage.setMinHeight(600);
-        String tileServerHost = "tile.openstreetmap.org";
-        Path cacheBasePath = Path.of("osm-cache");
-        Graph graph = Graph.loadFrom(Path.of("javelo-data"));
-        CityBikeCF costFunction = new CityBikeCF(graph);
 
-        SplitPane splitPane = new SplitPane();
+        Graph graph = Graph.loadFrom(Path.of("ch_west"));
+        CityBikeCF costFunction = new CityBikeCF(graph);
+        RouteComputer computer = new RouteComputer(graph, costFunction);
+        RouteBean routeBean = new RouteBean(computer);
+
+        String tileServerHost = "tile.openstreetmap.org";
+        Path cacheBasePath = Path.of("File2");
+        ErrorManager errorManager = new ErrorManager();
+
+        TileManager tileManager = new TileManager(cacheBasePath, tileServerHost);
+
+        AnnotatedMapManager annotatedMap = new AnnotatedMapManager(graph, tileManager, routeBean, e -> errorManager.displayError("erreur"));
+        SplitPane splitPane = new SplitPane(annotatedMap.pane());
         MenuItem exporterGPX = new MenuItem("Exporter GPX");
         Menu file = new Menu("Fichier");
+        file.getItems().add(exporterGPX);
         MenuBar menuBar = new MenuBar(file);
 
-//        SplitPane.setResizableWithParent();
-
         BorderPane borderPane = new BorderPane();
-        borderPane.getChildren().add(splitPane);
-        borderPane.getChildren().add(menuBar);
-
+        borderPane.setTop(menuBar);
+        borderPane.setCenter(splitPane);
 
         primaryStage.setScene(new Scene(borderPane));
         primaryStage.show();
     }
 }
-*/
