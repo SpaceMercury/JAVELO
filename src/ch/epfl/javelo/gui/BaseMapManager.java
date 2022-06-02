@@ -102,7 +102,7 @@ public final class BaseMapManager {
                 ? Math2.ceilDiv((int) canvas.getWidth(), IMG_SIZE)
                 : Math2.ceilDiv((int) canvas.getWidth(), IMG_SIZE) + 1;
 
-        //calculate how many tiles fit heightwise
+        //calculate how many tiles fit height-wise
         int heightNum = yOffset == 0
                 ? Math2.ceilDiv((int) canvas.getHeight(), IMG_SIZE)
                 : Math2.ceilDiv((int) canvas.getHeight(), IMG_SIZE) + 1;

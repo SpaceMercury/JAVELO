@@ -127,7 +127,7 @@ public final class MultiRoute implements Route{
     /**
      * Gives the index of the closest node at the chosen position in respect to the start of the itinerary
      * @param position position at which the node shall be searched for
-     * @return returns index of closest node to the position
+     * @return returns index of the closest node to the position
      */
     @Override
     public int nodeClosestTo(double position) {

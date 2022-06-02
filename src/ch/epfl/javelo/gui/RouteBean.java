@@ -60,7 +60,7 @@ public final class RouteBean{
                 int startId, endId;
                 for (int i = 0; i < waypoints.size() - 1; i++) {
                     startId = waypoints.get(i).nodeId();
-                    endId = waypoints.get(i).nodeId();
+                    endId = waypoints.get(i+1).nodeId();
                     NodePair current = new NodePair(startId, endId);
                     if(!routeCache.containsKey(current)) {
                         routeCache.put(current, routeComputer.bestRouteBetween(current.firstId, current.secondId));
@@ -77,6 +77,16 @@ public final class RouteBean{
                 }
             }
         });
+    }
+
+    public int indexOfNonEmptySegmentAt(double position) {
+        int index = getRoute().indexOfSegmentAt(position);
+        for (int i = 0; i <= index; i += 1) {
+            int n1 = waypoints.get(i).nodeId();
+            int n2 = waypoints.get(i + 1).nodeId();
+            if (n1 == n2) index += 1;
+        }
+        return index;
     }
 
     //---------------------------------------------------------------------

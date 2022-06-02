@@ -10,7 +10,7 @@ public record MapViewParameters(int zoom, double x, double y){
 
 
     /**
-     * Returns the point at the top left corner of the screen
+     * Returns the point in the top left corner of the screen
      * @return a Point2D, the type used by java to represent points
      */
     public Point2D topLeftPixel(){
@@ -30,7 +30,7 @@ public record MapViewParameters(int zoom, double x, double y){
     /**
      *
      * @param xCoord the x coordinate relative to the top left corner
-     * @param yCoord the y coordinate relative to the to left corner
+     * @param yCoord the y coordinate relative to the left corner
      * @return an instance of PointWebMercator
      */
     public PointWebMercator pointAt(double xCoord, double yCoord){
