@@ -14,15 +14,17 @@ import javafx.scene.shape.Polyline;
  * @author fuentes
  */
 public final class RouteManager {
+    private static final double RADIUS = 5;
+    private static final String DISK = "highlight";
+    private static final String LINE = "route";
+    private static final String ERROR = "Un point de passage est déjà présent à cet endroit !";
     private final Pane pane;
     private final RouteBean beanItinerary;
-    private ReadOnlyObjectProperty<MapViewParameters> mvParameters;
+    private final ReadOnlyObjectProperty<MapViewParameters> mvParameters;
     private final Consumer<String> errorConsumer;
-    private  Polyline itinerary;
+    private final Polyline itinerary;
     private final Circle disk;
     private final double diskPos;
-    private double xOffset;
-    private double yOffset;
 
 
 
@@ -32,21 +34,17 @@ public final class RouteManager {
         this.mvParameters = mvParameters;
         this.errorConsumer = errorConsumer;
         this.itinerary= new Polyline();
-        this.disk = new Circle(5);
-        itinerary.setId("route");
-        disk.setId("highlight");
+        this.disk = new Circle(RADIUS);
+        itinerary.setId(LINE);
+        disk.setId(DISK);
         itinerary.setVisible(true);
         disk.setVisible(true);
         diskPos = beanItinerary.getHighlightedPosition();
-        pane = new Pane();
-        pane.getChildren().add(itinerary);
-        pane.getChildren().add(disk);
-        pane.setPickOnBounds(false);
-
-        eventClickManager();
+        this.pane = new Pane(itinerary, disk);
+        this.pane.setPickOnBounds(false);
         this.mvParameters.addListener((object, oV, nV) -> repositionLine(oV, nV));
         this.beanItinerary.getRouteProperty().addListener((object, oV, nV) -> reconstructLine(oV, nV));
-
+        eventClickManager();
     }
 
 
@@ -62,7 +60,7 @@ public final class RouteManager {
             Waypoint newWaypoint = new Waypoint(cursorPoint, beanItinerary.getRoute().nodeClosestTo(beanItinerary.getHighlightedPosition()));
 
             if (beanItinerary.getWaypoints().contains(newWaypoint)) {
-                errorConsumer.accept("Un point de passage est déjà présent à cet endroit!");
+                errorConsumer.accept(ERROR);
             } else {
                 beanItinerary.getWaypoints().add(beanItinerary.getRoute().indexOfSegmentAt(beanItinerary.getHighlightedPosition())+1, newWaypoint);
             }
@@ -78,14 +76,14 @@ public final class RouteManager {
     private void repositionLine(MapViewParameters oldV, MapViewParameters newV){
 
         if(oldV.zoom() != newV.zoom()){
-            drawline();
+            drawLine();
         }
         else{
             lineOffsets(oldV, newV);
         }
     }
 
-    private void drawline(){
+    private void drawLine(){
 
     }
 
@@ -95,18 +93,11 @@ public final class RouteManager {
      * @param newV New Value of the MapViewParameters
      */
     private void lineOffsets(MapViewParameters oldV, MapViewParameters newV){
-        xOffset = oldV.x() - newV.x();
-        yOffset = oldV.y() - newV.y();
-
         //Apply the offsets to the polyline and disk
-        itinerary.setLayoutX(itinerary.getLayoutX() + xOffset);
-        itinerary.setLayoutY(itinerary.getLayoutY() + yOffset);
-        disk.setLayoutX(disk.getLayoutX() + xOffset);
-        disk.setLayoutY(disk.getLayoutY() + yOffset);
-
-        //Set offsets to 0 again, as the new position will become the new old position
-        xOffset = 0;
-        yOffset = 0;
+        itinerary.setLayoutX(itinerary.getLayoutX() + oldV.x() - newV.x());
+        itinerary.setLayoutY(itinerary.getLayoutY() + oldV.y() - newV.y());
+        disk.setLayoutX(disk.getLayoutX() + oldV.x() - newV.x());
+        disk.setLayoutY(disk.getLayoutY() + oldV.y() - newV.y());
     }
 
     /**
