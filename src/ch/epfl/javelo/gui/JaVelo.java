@@ -14,13 +14,11 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.function.Consumer;
 
 /**
  * @author fuentes
@@ -34,8 +32,13 @@ public final class JaVelo extends Application {
     public static void main(String[] args) { launch(args); }
 
 
+    /**
+     * Main start function that launches the program
+     * @param primaryStage the primary stage where everything will be displayed
+     * @throws IOException for the TileManager and graph
+     */
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) throws IOException {
 
         //Set the title of the Application as well as some parameters
         primaryStage.setTitle("JaVelo");
@@ -43,7 +46,7 @@ public final class JaVelo extends Application {
         primaryStage.setMinHeight(600);
 
         //Create instances of all the necessary classes
-        Graph graph = Graph.loadFrom(Path.of("ch_west"));
+        Graph graph = Graph.loadFrom(Path.of("javelo-data"));
         CityBikeCF costFunction = new CityBikeCF(graph);
         RouteComputer computer = new RouteComputer(graph, costFunction);
         RouteBean routeBean = new RouteBean(computer);
@@ -61,16 +64,19 @@ public final class JaVelo extends Application {
         //Adding the Route if it is not null
         routeBean.getElevationProfileProperty().addListener( (p, ov, nv) -> {
 
+            //New elevation profile
+            ElevationProfileManager elevationProfileManager = new ElevationProfileManager(routeBean.getElevationProfileProperty(), new SimpleDoubleProperty());
+
+            //If an elevation is already present it, replace it
             if(splitPane.getItems().size() == 2){
-                splitPane.getItems().remove(1);
-                splitPane.getItems().add(new ElevationProfileManager(routeBean.getElevationProfileProperty(), new SimpleDoubleProperty()).pane());
-
-            }
-
-            if(routeBean.getRoute() != null) {
-                ElevationProfileManager elevationProfileManager = new ElevationProfileManager(routeBean.getElevationProfileProperty(), new SimpleDoubleProperty());
-                splitPane.getItems().add(elevationProfileManager.pane());
+                splitPane.getItems().set(1,elevationProfileManager.pane());
                 SplitPane.setResizableWithParent( elevationProfileManager.pane(),false);
+            }
+            else {
+                if (routeBean.getRoute() != null) {
+                    splitPane.getItems().add(elevationProfileManager.pane());
+                    SplitPane.setResizableWithParent(elevationProfileManager.pane(), false);
+                }
             }
         });
 
