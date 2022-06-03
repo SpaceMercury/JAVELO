@@ -19,6 +19,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Locale;
 
+/**
+ * @author ventura
+ */
 public class GpxGenerator {
 
     /**

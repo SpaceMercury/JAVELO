@@ -18,9 +18,6 @@ import javafx.scene.text.Text;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 
-
-import java.util.List;
-
 /**
  * @author fuentes
  */

@@ -9,6 +9,9 @@ import java.util.List;
 
 import static java.util.Arrays.binarySearch;
 
+/**
+ * @author ventura
+ */
 public final class MultiRoute implements Route{
     private final List<Route> segments;
     private final double[] segmentLengths;

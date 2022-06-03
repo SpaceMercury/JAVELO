@@ -2,6 +2,9 @@ package ch.epfl.javelo.gui;
 
 import javafx.scene.layout.Pane;
 
+/**
+ * @author fuentes
+ */
 public final class ErrorManager {
 
 

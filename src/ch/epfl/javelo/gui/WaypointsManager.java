@@ -15,6 +15,9 @@ import javafx.scene.shape.SVGPath;
 import java.util.HashMap;
 import java.util.function.Consumer;
 
+/**
+ * @author ventura
+ */
 public final class WaypointsManager {
     //String constants used in the class
     private static final double SEARCH_DISTANCE = 500;

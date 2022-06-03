@@ -43,6 +43,10 @@ public final class RouteBean{
      */
     private record NodePair(int firstId, int secondId) {}
 
+    /**
+     * Public constructor for RouteBean, taking only a RouteComputer
+     * @param computer the routecomputer
+     */
     public RouteBean(RouteComputer computer) {
         this.routeComputer = computer;
         this.waypoints = observableArrayList();
@@ -53,6 +57,10 @@ public final class RouteBean{
 
     }
 
+    /**
+     * Private method, that updates route and elevationProfile when
+     * there is a change to waypoints
+     */
     private void updateListeners() {
         waypoints.addListener((ListChangeListener<? super Waypoint>) c -> {
             boolean nullProperty = false; //will become true if two waypoints cannot be connected
@@ -84,9 +92,14 @@ public final class RouteBean{
         });
     }
 
+    /**
+     * Method used for RouteManager
+     * @param position position in the route
+     * @return index of the non empty segment at the position
+     */
     public int indexOfNonEmptySegmentAt(double position) {
         int index = getRoute().indexOfSegmentAt(position);
-        for (int i = 0; i <= index; i += 1) {
+        for (int i = 0; i <= index; i++) {
             int n1 = waypoints.get(i).nodeId();
             int n2 = waypoints.get(i + 1).nodeId();
             if (n1 == n2) index += 1;

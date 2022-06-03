@@ -2,6 +2,9 @@ package ch.epfl.javelo.projection;
 
 import ch.epfl.javelo.Preconditions;
 
+/**
+ * @author ventura
+ */
 public record PointWebMercator(double x, double y) {
 
     private static final int BASE_ZOOM = 8;

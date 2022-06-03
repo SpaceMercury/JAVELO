@@ -44,9 +44,9 @@ public record GraphSectors(ByteBuffer buffer) {
         double yNeg = Math.floor(Math2.clamp(0, (negativeN / sectorHeight), 127));
         double yPos = Math.floor(Math2.clamp(0, (positiveN / sectorHeight), 127));
 
-        /**
-         * Defining this as a constant allows us to easier change the number of sectors we use
-         * should it be necessary
+        /*
+          Defining this as a constant allows us to easier change the number of sectors we use
+          should it be necessary
          */
         int sectorNumber = 128;
 

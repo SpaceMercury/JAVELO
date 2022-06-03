@@ -30,9 +30,9 @@ public final class RouteManager {
 
     /**
      * Public constructor for the RouteManager class
-     * @param bean The RouteBean of the
-     * @param parameters
-     * @param errorConsumer
+     * @param bean The RouteBean
+     * @param parameters The MapViewParameters
+     * @param errorConsumer The ErrorConsumer
      */
     public RouteManager(RouteBean bean, ReadOnlyObjectProperty<MapViewParameters> parameters, Consumer<String> errorConsumer) {
         this.bean = bean;
