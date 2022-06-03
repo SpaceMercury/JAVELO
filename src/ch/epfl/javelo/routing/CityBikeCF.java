@@ -7,6 +7,9 @@ import java.util.Optional;
 
 import static ch.epfl.javelo.data.Attribute.*;
 
+/**
+ * @author fuentes
+ */
 // Strongly inspired by brouter's "trekking" profile:
 // https://github.com/abrensch/brouter/blob/15e84c81ea23408abde8605bd57a87a777003ce2/misc/profiles2/trekking.brf
 

@@ -15,6 +15,9 @@ import javafx.scene.shape.SVGPath;
 import java.util.HashMap;
 import java.util.function.Consumer;
 
+/**
+ * @author ventura
+ */
 public final class WaypointsManager {
     //String constants used in the class
     private static final double SEARCH_DISTANCE = 500;
@@ -37,6 +40,13 @@ public final class WaypointsManager {
     private final HashMap<Waypoint, Group> pins;
     private ObjectProperty<Point2D> mouseLocation;
 
+    /**
+     * Public constructor for WaypointsManager
+     * @param graph The graph it takes
+     * @param parameters The mapview parameters
+     * @param waypoints The list of waypoints given to it
+     * @param errorConsumer The error consumer
+     */
     public WaypointsManager(Graph graph,
                             ObjectProperty<MapViewParameters> parameters,
                             ObservableList<Waypoint> waypoints,
@@ -49,7 +59,21 @@ public final class WaypointsManager {
         this.errorConsumer = errorConsumer;
         this.pane = new Pane();
         pane.setPickOnBounds(false);
-        waypoints.addListener(this::setSVG);
+        waypoints.addListener((ListChangeListener<? super Waypoint> ) c -> {
+                while (c.next()) {
+                    if (c.wasAdded()) {
+                        for (Waypoint waypoint : c.getAddedSubList()) {
+                            setPin(waypoint);
+                        }
+                    }
+                    if (c.wasRemoved()) {
+                        for (Waypoint waypoint : c.getRemoved()) {
+                            pane.getChildren().remove(pins.remove(waypoint));
+                        }
+                    }
+                }
+                updatePins();
+        });
         parameters.addListener(c -> updatePins());
         for (Waypoint waypoint : waypoints) {
             setPin(waypoint);
@@ -57,10 +81,19 @@ public final class WaypointsManager {
         updatePins();
     }
 
+    /**
+     * Method that returns the pane
+     * @return pane
+     */
     public Pane pane() {
         return pane;
     }
 
+    /**
+     * Public method that adds a Waypoint to the waypoint list
+     * @param x the xcoord of the new waypoint
+     * @param y the ycoord of the new waypoint
+     */
     public void addWaypoint(double x, double y) {
         PointWebMercator pointWM = property.get().pointAt(x, y);
         PointCh pointCh = pointWM.toPointCh();
@@ -72,22 +105,10 @@ public final class WaypointsManager {
                 graph.nodeClosestTo(pointCh, SEARCH_DISTANCE)));
     }
 
-    private void setSVG(ListChangeListener.Change<? extends Waypoint> c) {
-        while (c.next()) {
-            if (c.wasAdded()) {
-                for (Waypoint waypoint : c.getAddedSubList()) {
-                    setPin(waypoint);
-                }
-            }
-            if (c.wasRemoved()) {
-                for (Waypoint waypoint : c.getRemoved()) {
-                    pane.getChildren().remove(pins.remove(waypoint));
-                }
-            }
-        }
-        updatePins();
-    }
-
+    /**
+     * Private method that takes care of updating the Styleclass of a pin
+     * @param waypoint The waypoint whose pin is to be updated
+     */
     private void setPin(Waypoint waypoint) {
         SVGPath outline = new SVGPath();
         SVGPath circle = new SVGPath();
@@ -105,6 +126,10 @@ public final class WaypointsManager {
         pins.put(waypoint, pin);
     }
 
+    /**
+     * Private method that updates all the pins in the list
+     * changing their design depending on their new position
+     */
     private void updatePins() {
         for (Waypoint waypoint : waypoints) {
             Group pin = pins.get(waypoint);
@@ -126,22 +151,43 @@ public final class WaypointsManager {
         }
     }
 
+    /**
+     * Private method that removes a waypoint if it is clicked on
+     * @param mouseEvent The click
+     * @param waypoint The waypoint that is to be removed
+     */
     private void click(MouseEvent mouseEvent, Waypoint waypoint) {
         if (mouseEvent.isStillSincePress()) {
             waypoints.remove(waypoint);
         }
     }
 
+    /**
+     * Private method that updates the mouse location when
+     * the mouse button is pressed
+     * @param mouseEvent
+     */
     private void press(MouseEvent mouseEvent) {
         mouseLocation = new SimpleObjectProperty<>(new Point2D(mouseEvent.getX(), mouseEvent.getY()));
     }
 
-
+    /**
+     * Private method that updates a pins placement while it is being dragged
+     * @param mouseEvent the drag
+     * @param pin the pin
+     */
     private void drag(MouseEvent mouseEvent, Group pin) {
         pin.setLayoutX(pin.getLayoutX() + mouseEvent.getX() - mouseLocation.getValue().getX());
         pin.setLayoutY(pin.getLayoutY() + mouseEvent.getY() - mouseLocation.getValue().getY());
     }
 
+    /**
+     * Private method that updates the location of the waypoint of a pin
+     * after it has been replaced by dragging
+     * @param mouseEvent the release of the drag
+     * @param waypoint the waypoint to be updated
+     * @param pin the waypoints pin
+     */
     private void release(MouseEvent mouseEvent, Waypoint waypoint, Group pin) {
         if (!mouseEvent.isStillSincePress()) {
             int id = waypoints.indexOf(waypoint);

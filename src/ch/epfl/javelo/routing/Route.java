@@ -4,6 +4,11 @@ import ch.epfl.javelo.projection.PointCh;
 
 import java.util.List;
 
+/**
+ * @author ventura
+ * @author fuentes
+ */
+
 @SuppressWarnings("ALL")
 public interface Route {
 
