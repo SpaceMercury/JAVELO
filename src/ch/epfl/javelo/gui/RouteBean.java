@@ -4,11 +4,12 @@ import ch.epfl.javelo.routing.*;
 import javafx.beans.property.*;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-
 import java.util.*;
-
 import static javafx.collections.FXCollections.observableArrayList;
 
+/**
+ * @author ventura
+ */
 public final class RouteBean{
     private static final double MAX_DISTANCE = 5.0;
     private static final int MAX_SIZE = 100;
@@ -38,14 +39,15 @@ public final class RouteBean{
      * nodes within the cache memory map created to win time
      * in calculating the fastest way, taking the node ids
      * as construction parameters.
+     * It is private as it is only used and needed here
      */
-    record NodePair(int firstId, int secondId) {}
+    private record NodePair(int firstId, int secondId) {}
 
     public RouteBean(RouteComputer computer) {
         this.routeComputer = computer;
         this.waypoints = observableArrayList();
         this.route = new SimpleObjectProperty<>(null);
-        this.highlightedPosition = new SimpleDoubleProperty(Double.NaN);
+        this.highlightedPosition = new SimpleDoubleProperty(1000);
         this.elevationProfile = new SimpleObjectProperty<>(null);
         updateListeners();
 
@@ -75,6 +77,9 @@ public final class RouteBean{
                     route.setValue(new MultiRoute(subRoutes));
                     elevationProfile.setValue(ElevationProfileComputer.elevationProfile(route.getValue(), MAX_DISTANCE));
                 }
+            } else {
+                route.setValue(null);
+                elevationProfile.setValue(null);
             }
         });
     }
