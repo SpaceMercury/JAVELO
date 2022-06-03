@@ -30,6 +30,12 @@ public class GpxGenerator {
     private GpxGenerator(){
     }
 
+    /**
+     * Method that creates a GPX file of a route
+     * @param route the route
+     * @param profile the route's elevation profile
+     * @return
+     */
     public static Document createGPX(Route route, ElevationProfile profile) {
         double lon, lat, length = 0;
         ArrayList<PointCh> routePoints = new ArrayList<>(route.points());
@@ -77,6 +83,13 @@ public class GpxGenerator {
         return doc;
     }
 
+    /**
+     * Method that writes a GPX file with the itinerary
+     * @param fileName name of the file in which it is to be written
+     * @param route the route to be saved
+     * @param profile the routes elevationProfile
+     * @throws IOException
+     */
     public static void writeGPX(String fileName, Route route, ElevationProfile profile) throws IOException {
         Document doc = createGPX(route, profile);
         Writer w = Files.newBufferedWriter(Path.of(fileName));
@@ -92,6 +105,10 @@ public class GpxGenerator {
         }
     }
 
+    /**
+     * Private method creating a new Document
+     * @return a new document
+     */
     private static Document newDocument() {
         try {
             return DocumentBuilderFactory
